@@ -1,7 +1,7 @@
 /* GEO RADIO - offline helper
  * Keeps the page + pictures on your computer so the site loads even on a bad modem day.
  * Radio streams are NEVER touched here - they always come straight from the station. */
-var CACHE_NAME = "geo-radio-v6";
+var CACHE_NAME = "geo-radio-v7";
 var ASSETS = [
   "./",
   "./index.html",
@@ -29,7 +29,8 @@ var ASSETS = [
   "./images/counter/4.gif", "./images/counter/5.gif", "./images/counter/6.gif", "./images/counter/7.gif",
   "./images/counter/8.gif", "./images/counter/9.gif",
   "./images/pinups/denim-dream.jpg",
-  "./images/pinups/sapphire-silk.gif"
+  "./images/pinups/sapphire-silk.gif",
+  "./images/pinups/showtime.gif"
 ];
 
 self.addEventListener("install", function (e) {
