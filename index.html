@@ -147,7 +147,7 @@ Please upgrade to Netscape Navigator 4.0 or Internet Explorer 5!</B></FONT>
       <FONT FACE="Times New Roman, Times, serif" SIZE="3" COLOR="#FFFF00"><I>~ The Best High-Fidelity Broadcasts on the World Wide Web ~</I></FONT><BR>
       <FONT FACE="Verdana, Arial, Helvetica" SIZE="1" COLOR="#8888FF">a Geo Subash production &nbsp;*&nbsp; est. 1999</FONT>
     </TD>
-    <TD WIDTH="90" ALIGN="center" VALIGN="bottom"><IMG SRC="picmix.com_68043.gif" WIDTH="64" HEIGHT="110" ALT="Hello!"></TD>
+    <TD WIDTH="90" ALIGN="center" VALIGN="bottom"><IMG SRC="picmix.com_68043.gif" WIDTH="64" HEIGHT="110" ALT="Hello!" onClick="secretClick()"></TD>
   </TR>
   </TABLE>
 </TD></TR>
@@ -208,7 +208,6 @@ Please upgrade to Netscape Navigator 4.0 or Internet Explorer 5!</B></FONT>
     <TR><TD><IMG SRC="images/bullet.gif" WIDTH="12" HEIGHT="12" ALT="*"></TD><TD><FONT FACE="Verdana, Arial" SIZE="1"><A HREF="#about">About Geo</A></FONT></TD></TR>
     <TR><TD><IMG SRC="images/bullet.gif" WIDTH="12" HEIGHT="12" ALT="*"></TD><TD><FONT FACE="Verdana, Arial" SIZE="1"><A HREF="#about">My Rig</A></FONT></TD></TR>
     <TR><TD><IMG SRC="images/bullet.gif" WIDTH="12" HEIGHT="12" ALT="*"></TD><TD><FONT FACE="Verdana, Arial" SIZE="1"><A HREF="#links">Cool Links</A></FONT></TD></TR>
-    <TR><TD><IMG SRC="images/bullet.gif" WIDTH="12" HEIGHT="12" ALT="*"></TD><TD><FONT FACE="Verdana, Arial" SIZE="1"><A HREF="#pinups">Pin-Up Parade</A> <IMG SRC="images/new.gif" WIDTH="34" HEIGHT="15" ALT="NEW!" ALIGN="absmiddle"></FONT></TD></TR>
     <TR><TD><IMG SRC="images/bullet.gif" WIDTH="12" HEIGHT="12" ALT="*"></TD><TD><FONT FACE="Verdana, Arial" SIZE="1"><A HREF="#guestbook">Guestbook</A></FONT></TD></TR>
     <TR><TD><IMG SRC="images/bullet.gif" WIDTH="12" HEIGHT="12" ALT="*"></TD><TD><FONT FACE="Verdana, Arial" SIZE="1"><A HREF="#email">Email Me</A></FONT></TD></TR>
     <TR ID="launch-row"><TD><IMG SRC="images/bullet.gif" WIDTH="12" HEIGHT="12" ALT="*"></TD><TD><FONT FACE="Verdana, Arial" SIZE="1"><A HREF="#" onClick="launchStandalone(); return false;"><FONT COLOR="#00FF00"><B ID="launch-text">POP-UP PLAYER</B></FONT></A></FONT></TD></TR>
@@ -544,7 +543,7 @@ Please upgrade to Netscape Navigator 4.0 or Internet Explorer 5!</B></FONT>
     <TR><TD ALIGN="center">
       <FONT FACE="Times New Roman, Times, serif" SIZE="3" COLOR="#FFCCDD"><P><I>The loveliest ladies of the World Wide Web!</I></P></FONT>
       <TABLE BORDER="0" CELLPADDING="5" CELLSPACING="0" ID="pinup-grid"></TABLE>
-      <FONT FACE="Verdana, Arial" SIZE="1" COLOR="#AA7799">Click a pin-up for full size. Shuffled every visit!</FONT>
+      <FONT FACE="Verdana, Arial" SIZE="1" COLOR="#AA7799">Shhh... you found the secret page! Click a pin-up for full size.</FONT>
       <BR><BR>
     </TD></TR>
     </TABLE>
@@ -599,20 +598,6 @@ Please upgrade to Netscape Navigator 4.0 or Internet Explorer 5!</B></FONT>
     <TR><TD><FONT FACE="Verdana, Arial" SIZE="1"><FONT COLOR="#00FFFF">08/30/99</FONT><BR>Guestbook works now!!</FONT></TD></TR>
     <TR><TD><FONT FACE="Verdana, Arial" SIZE="1"><FONT COLOR="#00FFFF">08/01/99</FONT><BR>Site is OPEN!</FONT></TD></TR>
     </TABLE>
-  </TD></TR>
-  </TABLE>
-
-  <BR>
-
-  <!-- pin-up of the day -->
-  <TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#993366" CELLPADDING="0" CELLSPACING="0" BGCOLOR="#1A0011">
-  <TR><TD CLASS="hdr" STYLE="background-color: #990044;">.: PIN-UP OF THE DAY :.</TD></TR>
-  <TR><TD ALIGN="center">
-    <BR>
-    <A HREF="#pinups"><IMG ID="potd-img" SRC="images/pinups/denim-dream.jpg" WIDTH="120" ALT="Pin-up of the day"></A><BR>
-    <FONT FACE="Verdana, Arial" SIZE="1" COLOR="#FF99CC"><B ID="potd-name">Denim Dream</B></FONT><BR>
-    <FONT FACE="Verdana, Arial" SIZE="1"><A HREF="#pinups">See them all &gt;&gt;</A></FONT>
-    <BR><BR>
   </TD></TR>
   </TABLE>
 
@@ -764,6 +749,7 @@ function showPage(name) {
   var found = false;
   for (var i = 0; i < PAGES.length; i++) if (PAGES[i] === name) found = true;
   if (!found) name = "home";
+  if (name === "pinups" && !pinupsUnlocked) { name = "home"; if (window.location.hash === "#pinups") window.location.hash = "home"; }
   if (name === "pinups") drawPinups();
 
   for (var j = 0; j < PAGES.length; j++) {
@@ -1582,6 +1568,18 @@ var PINUPS = [
   { file: "showtime.gif",      name: "Showtime" }
 ];
 
+/* secret way in: click the pin-up girl on the RIGHT of the header 3 times */
+var pinupsUnlocked = false, pinClicks = 0, pinClickTimer = null;
+function secretClick() {
+  pinClicks++;
+  clearTimeout(pinClickTimer);
+  pinClickTimer = setTimeout(function () { pinClicks = 0; }, 1500);
+  if (pinClicks < 3) return;
+  pinClicks = 0;
+  pinupsUnlocked = true;
+  goPage("pinups");
+}
+
 function shuffle(a) {
   for (var i = a.length - 1; i > 0; i--) {
     var j = Math.floor(Math.random() * (i + 1));
@@ -1606,16 +1604,6 @@ function drawPinups() {
                      escapeHTML(list[i].name) + '</B></FONT>';
   }
 }
-
-/* a different girl each day - everybody sees the same one */
-function setupPinupOfTheDay() {
-  var day = Math.floor(new Date().getTime() / 86400000);
-  var p = PINUPS[day % PINUPS.length];
-  $("potd-img").src = "images/pinups/" + p.file;
-  $("potd-img").alt = p.name;
-  setText("potd-name", p.name);
-}
-
 
 /* =========================================================
  *  POP-UP PLAYER / INSTALL AS APP
@@ -1735,7 +1723,6 @@ function init() {
   buildStationList();
   buildVolumeBar();
   buildLinks();
-  setupPinupOfTheDay();
   drawGuestbook();
   drawCounter();
   setupDino();
