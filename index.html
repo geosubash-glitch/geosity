@@ -147,7 +147,7 @@ Please upgrade to Netscape Navigator 4.0 or Internet Explorer 5!</B></FONT>
       <FONT FACE="Times New Roman, Times, serif" SIZE="3" COLOR="#FFFF00"><I>~ The Best High-Fidelity Broadcasts on the World Wide Web ~</I></FONT><BR>
       <FONT FACE="Verdana, Arial, Helvetica" SIZE="1" COLOR="#8888FF">a Geo Subash production &nbsp;*&nbsp; est. 1999</FONT>
     </TD>
-    <TD WIDTH="90" ALIGN="center" VALIGN="bottom"><IMG SRC="picmix.com_68043.gif" WIDTH="64" HEIGHT="110" ALT="Hello!" onClick="secretClick()"></TD>
+    <TD WIDTH="90" ALIGN="center" VALIGN="bottom"><IMG SRC="picmix.com_68043.gif" WIDTH="64" HEIGHT="110" ALT="Hello!"></TD>
   </TR>
   </TABLE>
 </TD></TR>
@@ -536,30 +536,6 @@ Please upgrade to Netscape Navigator 4.0 or Internet Explorer 5!</B></FONT>
     <P ALIGN="center"><FONT FACE="Verdana, Arial" SIZE="1" COLOR="#8888AA">Headlines update by themselves every 10 minutes. Stories open in a new window.</FONT></P>
   </DIV>
 
-  <!-- ===================== PAGE: PIN-UPS (secret!) ===================== -->
-  <DIV ID="page-pinups" STYLE="display: none;">
-    <TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#993399" CELLPADDING="0" CELLSPACING="0" BGCOLOR="#110011">
-    <TR><TD CLASS="hdr" STYLE="background-color: #660066;">.: GEO'S SECRET PIN-UP GALLERY :.</TD></TR>
-    <TR><TD ALIGN="center">
-      <DIV ID="pin-viewer" STYLE="display: none;">
-        <BR>
-        <IMG ID="pin-big" SRC="images/new.gif" ALT="" STYLE="max-width: 420px; max-height: 420px; border: 3px ridge #FF66FF;"><BR>
-        <FONT FACE="Verdana, Arial" SIZE="2" COLOR="#FF99FF"><B ID="pin-caption">&nbsp;</B></FONT><BR>
-        <FONT FACE="Verdana, Arial" SIZE="1" COLOR="#AA88AA" ID="pin-credit">&nbsp;</FONT><BR>
-        <FONT FACE="Courier New, Courier" SIZE="1" COLOR="#AAAAAA" ID="pin-count">&nbsp;</FONT><BR>
-        <INPUT TYPE="button" CLASS="oldbtn" VALUE="&lt;&lt; PREV" onClick="pinStep(-1)">
-        <INPUT TYPE="button" CLASS="oldbtn" VALUE="THUMBNAILS" onClick="pinClose()">
-        <INPUT TYPE="button" CLASS="oldbtn" VALUE="NEXT &gt;&gt;" onClick="pinStep(1)">
-        <BR><BR>
-      </DIV>
-      <DIV ID="pin-thumbs"><BR><FONT FACE="Verdana, Arial" SIZE="2" COLOR="#FF99FF">Developing the photos... please wait</FONT><BR><BR></DIV>
-      <FONT FACE="Verdana, Arial" SIZE="1" COLOR="#886688">Vintage pictures come from the free Wikimedia Commons library - public domain or free licenses, credited under each photo.</FONT><BR>
-      <FONT FACE="Verdana, Arial" SIZE="1" COLOR="#886688">Shhh... you found the secret page. <A HREF="#home">Get me outta here!</A></FONT>
-      <BR><BR>
-    </TD></TR>
-    </TABLE>
-  </DIV>
-
   <!-- ===================== PAGE: EMAIL ===================== -->
   <DIV ID="page-email" STYLE="display: none;">
     <TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#333399" CELLPADDING="0" CELLSPACING="0" BGCOLOR="#000022">
@@ -718,7 +694,7 @@ var WEBRING_SITES = [
   { name: "ToastyTech",                 url: "http://toastytech.com",          desc: "Old GUIs and web browsers." }
 ];
 
-var PAGES = ["home", "news", "stations", "about", "links", "guestbook", "email", "pinups"];
+var PAGES = ["home", "news", "stations", "about", "links", "guestbook", "email"];
 
 
 /* ---------------- LITTLE HELPERS ---------------- */
@@ -760,8 +736,6 @@ function showPage(name) {
   var found = false;
   for (var i = 0; i < PAGES.length; i++) if (PAGES[i] === name) found = true;
   if (!found) name = "home";
-  if (name === "pinups" && !pinupsAllowed()) { name = "home"; if (window.location.hash === "#pinups") window.location.hash = "home"; }
-  if (name === "pinups") drawPinups();
 
   for (var j = 0; j < PAGES.length; j++) {
     var p = PAGES[j];
@@ -1567,129 +1541,6 @@ function drawNews(source, when) {
     html += '<BR><FONT FACE="Verdana, Arial" SIZE="1"><A HREF="' + escapeHTML(n.link) + '" TARGET="_blank">[ Full Story &gt;&gt; ]</A></FONT></TD></TR></TABLE>';
   }
   $("news-list").innerHTML = html;
-}
-
-
-/* =========================================================
- *  SECRET PIN-UP GALLERY
- *  Unlock: click the pin-up girl on the RIGHT of the header 3 times.
- *
- *  Pictures come from two places:
- *   1. GALLERY below - your own files in images/gallery/
- *   2. Wikimedia Commons - a free library where every picture is public
- *      domain or free to reuse with credit. They show up right here on
- *      the page (no leaving the site) with the credit the license needs.
- * ========================================================= */
-var GALLERY = [
-  { src: "picmix.com_68043.gif", caption: "The Ringmaster", credit: "" }
-  // { src: "images/gallery/beach1.jpg", caption: "Malibu, summer '99", credit: "photo by me" },
-];
-var COMMONS_API = "https://commons.wikimedia.org/w/api.php";
-var COMMONS_SEARCHES = [
-  "pin-up girl swimsuit",
-  "vintage bathing beauty",
-  "1950s swimsuit model",
-  "pin-up poster"
-];
-var COMMONS_MAX = 32;
-/* keep it PG-13 - skip anything whose title or description says otherwise */
-var PIN_BLOCK = /nud(e|ity)|naked|topless|nsfw|erotic|porn|explicit|sex|lingerie|playboy|bare[- ]breast/i;
-
-var pinList = [], pinState = "idle";   // idle | loading | done
-var pinClicks = 0, pinClickTimer = null, pinIdx = 0;
-
-function pinupsAllowed() {
-  try { return window.sessionStorage.getItem("geo_pinups") === "1"; } catch (e) { return false; }
-}
-
-function secretClick() {
-  pinClicks++;
-  clearTimeout(pinClickTimer);
-  pinClickTimer = setTimeout(function () { pinClicks = 0; }, 1500);
-  if (pinClicks < 3) return;
-  pinClicks = 0;
-  if (!pinupsAllowed()) {
-    if (!confirm("*** WARNING ***\n\nYou found a SECRET area for visitors 18 and over.\n\nClick OK if you are 18 or older.\nClick Cancel to go back.")) return;
-    try { window.sessionStorage.setItem("geo_pinups", "1"); } catch (e) {}
-  }
-  goPage("pinups");
-}
-
-function commonsURL(search) {
-  return COMMONS_API + "?action=query&format=json&origin=*" +
-    "&generator=search&gsrnamespace=6&gsrlimit=20&gsrsearch=" + encodeURIComponent(search + " filetype:bitmap") +
-    "&prop=imageinfo&iiprop=url|mime|extmetadata&iiurlwidth=420" +
-    "&iiextmetadatafilter=" + encodeURIComponent("LicenseShortName|Artist|ObjectName|ImageDescription|Credit");
-}
-
-function drawPinups() {
-  if (pinState !== "idle") return;
-  pinState = "loading";
-  pinList = GALLERY.slice(0);
-  var seen = {}, left = COMMONS_SEARCHES.length;
-
-  var done = function () {
-    if (--left > 0) return;
-    pinState = "done";
-    renderPinThumbs();
-  };
-
-  for (var i = 0; i < COMMONS_SEARCHES.length; i++) {
-    getJSON(commonsURL(COMMONS_SEARCHES[i]), function (data) {
-      var pages = (data && data.query && data.query.pages) || {};
-      for (var id in pages) {
-        var pg = pages[id], info = pg.imageinfo && pg.imageinfo[0];
-        if (!info || seen[pg.title] || pinList.length >= COMMONS_MAX + GALLERY.length) continue;
-        if (!/^image\/(jpeg|png|gif)$/.test(info.mime || "")) continue;
-        var meta = info.extmetadata || {};
-        var m = function (k) { return stripTags(meta[k] && meta[k].value); };
-        var name = m("ObjectName") || pg.title.replace(/^File:/, "").replace(/\.[a-z]+$/i, "");
-        if (PIN_BLOCK.test(pg.title + " " + name + " " + m("ImageDescription"))) continue;
-        var license = m("LicenseShortName");
-        if (!license) continue;                 // no license info = don't show it
-        seen[pg.title] = true;
-        pinList.push({
-          src: safeLink(info.thumburl || info.url),
-          caption: name.substr(0, 60),
-          credit: (m("Artist") ? m("Artist").substr(0, 60) + " - " : "") + license + " - via Wikimedia Commons"
-        });
-      }
-      done();
-    }, done);
-  }
-}
-
-function renderPinThumbs() {
-  var html = '<BR><TABLE BORDER="0" CELLPADDING="6" CELLSPACING="0"><TR>';
-  for (var i = 0; i < pinList.length; i++) {
-    if (i && i % 4 === 0) html += '</TR><TR>';
-    html += '<TD ALIGN="center" VALIGN="bottom" WIDTH="100"><A HREF="#pinups" onClick="pinOpen(' + i + '); return false;">' +
-            '<IMG SRC="' + escapeHTML(pinList[i].src) + '" HEIGHT="120" ALT="' + escapeHTML(pinList[i].caption) + '" STYLE="max-width: 96px; border: 2px outset #FF66FF;" LOADING="lazy"></A><BR>' +
-            '<FONT FACE="Verdana, Arial" SIZE="1" COLOR="#FF99FF">' + escapeHTML(pinList[i].caption.substr(0, 24)) + '</FONT></TD>';
-  }
-  html += '</TR></TABLE>';
-  if (pinList.length <= GALLERY.length) {
-    html += '<FONT FACE="Verdana, Arial" SIZE="1" COLOR="#FF6666">Couldn\'t reach the photo library right now - try again later!</FONT><BR>';
-  }
-  $("pin-thumbs").innerHTML = html + '<BR>';
-}
-
-function pinOpen(i) {
-  if (!pinList.length) return;
-  pinIdx = (i + pinList.length) % pinList.length;
-  var it = pinList[pinIdx];
-  $("pin-big").src = it.src;
-  setText("pin-caption", it.caption);
-  setText("pin-credit", it.credit || " ");
-  setText("pin-count", "picture " + (pinIdx + 1) + " of " + pinList.length);
-  $("pin-viewer").style.display = "block";
-  $("pin-thumbs").style.display = "none";
-  window.scrollTo(0, 0);
-}
-function pinStep(d) { pinOpen(pinIdx + d); }
-function pinClose() {
-  $("pin-viewer").style.display = "none";
-  $("pin-thumbs").style.display = "block";
 }
 
 
