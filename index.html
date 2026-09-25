@@ -1,1024 +1,1472 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-    <title>~*~ GEOCITIES ~*~ The Neighborhood for Retro Souls ~*~</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="RetroRadio">
-    <link rel="apple-touch-icon" href="https://img.icons8.com/color/192/floppy-disk.png">
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            background-image: url('https://media.giphy.com/media/U3qYN8S0j3bpK/giphy.gif');
-            background-attachment: fixed;
-            background-color: #000000;
-            color: #CCCCCC;
-            font-family: 'Times New Roman', Times, serif;
-            margin: 0;
-            padding: 0;
-            scrollbar-base-color: #333333;
-            scrollbar-arrow-color: #CCCCCC;
-        }
-
-        /* Matrix Mode Styles */
-        body.matrix-mode {
-            background-image: none;
-            background-color: #000000;
-            color: #00FF00 !important;
-            font-family: 'Courier New', Courier, monospace !important;
-        }
-
-        body.matrix-mode * {
-            border-color: #00FF00 !important;
-            color: #00FF00 !important;
-            font-family: 'Courier New', Courier, monospace !important;
-        }
-
-        body.matrix-mode .content-box {
-            background-color: #001100 !important;
-            border: 1px solid #00FF00 !important;
-        }
-
-        body.matrix-mode .section-header {
-            background-color: #004400 !important;
-            color: #00FF00 !important;
-        }
-
-        body.matrix-mode a {
-            color: #00FF00 !important;
-        }
-
-        body.matrix-mode button {
-            background-color: #003300 !important;
-            color: #00FF00 !important;
-            border: 1px solid #00FF00 !important;
-        }
-
-        .main-container {
-            width: 100%;
-            margin: 0;
-            border: none;
-            padding: 0;
-        }
-
-        a {
-            color: #FFFF00;
-            text-decoration: none;
-        }
-
-        a:hover {
-            color: #FF0000;
-            text-decoration: underline;
-            cursor: pointer;
-        }
-
-        a:visited {
-            color: #AA00AA;
-        }
-
-        .content-box {
-            border: 2px solid #555555;
-            background-color: #000033;
-            padding: 5px;
-            margin-bottom: 10px;
-        }
-
-        .section-header {
-            background-color: #000066;
-            color: #FFFFFF;
-            font-family: 'Arial', sans-serif;
-            font-weight: bold;
-            text-align: center;
-            padding: 3px;
-            border: 1px solid #8888FF;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-
-        /* Winamp Player Styles */
-        .player-frame {
-            width: 100%;
-            background-color: #222;
-            border: 2px solid #666;
-            margin: 0 auto 10px auto;
-            color: #00FF00;
-            font-family: 'Arial', sans-serif;
-        }
-
-        .lcd-display {
-            background-color: #000;
-            border: 2px inset #444;
-            color: #00FF00;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            padding: 4px;
-            margin-bottom: 5px;
-            white-space: pre-wrap;
-            height: 40px;
-            overflow: hidden;
-        }
-
-        .winamp-btn {
-            background: linear-gradient(#ccc, #666);
-            border: 1px outset #fff;
-            color: black;
-            font-size: 10px;
-            cursor: pointer;
-            width: 25px;
-            height: 20px;
-            margin: 1px;
-        }
-
-        .winamp-btn:active {
-            border: 1px inset #fff;
-        }
-
-        /* Helpers */
-        .hidden {
-            display: none;
-        }
-
-        /* Responsive Layout */
-        @media (max-width: 768px) {
-
-            .main-layout,
-            .main-layout tbody,
-            .main-layout tr,
-            .main-layout td {
-                display: block;
-                width: 100% !important;
-                box-sizing: border-box;
-            }
-
-            /* Sidebar on Mobile */
-            .main-layout td[width="180"] {
-                width: 100% !important;
-                border-right: none !important;
-                border-bottom: 2px ridge #6666FF;
-            }
-        }
-    </style>
-</head>
-
-<body onload="init()">
-
-    <div class="main-container">
-
-        <!-- HEADER -->
-        <table width="100%" border="0" cellspacing="0" cellpadding="10" style="border-bottom: 2px ridge #6666FF;">
-            <tr>
-                <!-- Left GIF -->
-                <td width="150" align="left" valign="middle">
-                    <img src="picmix.com_68043.gif" style="max-height: 80px;">
-                </td>
-
-                <!-- Center Title -->
-                <td align="center" valign="middle">
-                    <br>
-                    <h1>
-                        <img src="https://web.archive.org/web/20090829103723/http://geocities.com/clipart/pbi/bullets/Templates/Animated/fire_bullet.gif"
-                            style="vertical-align: middle;">
-                        GEOCITIES
-                        <img src="https://web.archive.org/web/20090829103723/http://geocities.com/clipart/pbi/bullets/Templates/Animated/fire_bullet.gif"
-                            style="vertical-align: middle;">
-                    </h1>
-                    <font color="#FFFF00" size="2"><i>The Best High-Fidelity Broadcasts on the World Wide Web</i></font>
-                    <br><br>
-
-                    <table width="100%" border="1" bordercolor="#444444" cellpadding="5" cellspacing="0"
-                        bgcolor="#000022">
-                        <tr>
-                            <td width="25%" align="center"><a href="#" onclick="switchPage('home'); return false;">[
-                                    HOME ]</a></td>
-                            <td width="25%" align="center"><a href="#" onclick="switchPage('stations'); return false;">[
-                                    STATIONS
-                                    ]</a></td>
-                            <td width="25%" align="center"><a href="#"
-                                    onclick="switchPage('guestbook'); return false;">[ GUESTBOOK
-                                    ]</a>
-                            </td>
-                            <td width="25%" align="center"><a href="#" onclick="switchPage('email'); return false;">[
-                                    EMAIL ME ]</a>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-
-                <!-- Right GIF -->
-                <td width="150" align="right" valign="middle">
-                    <img src="picmix.com_68043.gif" style="max-height: 80px;">
-                </td>
-            </tr>
-        </table>
-
-        <br>
-
-        <!-- MARQUEE -->
-        <div
-            style="background-color: #000044; border-top: 1px solid white; border-bottom: 1px solid white; color: white; font-family: Courier; padding: 2px;">
-            <marquee scrollamount="5" scrolldelay="100">
-                *** WELCOME TO GEOCITIES *** MADE BY GEO SUBASH *** NEW STATION ADDED: NIGHTWAVE (VAPORWAVE) *** DON'T
-                FORGET TO SIGN THE GUESTBOOK ***
-            </marquee>
-        </div>
-
-        <br>
-
-        <!-- BODY TABLE -->
-        <table class="main-layout" width="100%" cellpadding="10" cellspacing="0" border="0">
-            <tr>
-                <!-- LEFT COLUMN: Sidebar (Simulated Frame) -->
-                <td width="180" valign="top" bgcolor="#000044" style="border-right: 2px ridge #6666FF; padding: 10px;">
-                    <div class="content-box">
-                        <div class="section-header">.: SITE MENU :.</div>
-                        <font face="Verdana" size="1">
-                            <ul>
-                                <li><a href="#" onclick="switchPage('home'); return false;">Main</a></li>
-                                <li><a href="#" onclick="switchPage('about'); return false;">About Geo</a></li>
-                                <li><a href="#" onclick="switchPage('about'); return false;">My Rig</a></li>
-                                <li><a href="#" onclick="switchPage('stations'); return false;">Links</a></li>
-
-                                <li id="relaunch-link" class="hidden"><a href="#" style="color: lime;"
-                                        onclick="relaunchPlayer(); return false;"><b>LAUNCH RADIO</b></a></li>
-                                <li id="launch-link"><a href="#" style="color: lime;"
-                                        onclick="launchStandalone(); return false;"><b id="launch-link-text">OPEN
-                                            WINDOW</b></a></li>
-                            </ul>
-                        </font>
-                    </div>
-
-                    <br>
-
-                    <!-- VIRTUAL DINO GIF -->
-                    <div class="content-box" align="center">
-                        <div class="section-header">.: DINO :.</div>
-                        <br>
-                        <img src="https://media.tenor.com/yK5p7vWfAQQAAAAi/dinosaur-dino.gif" alt="Retro Dino"
-                            style="max-width: 120px;">
-                        <!-- Alternative: https://web.archive.org/web/20090829023429/http://geocities.com/SoHo/Lofts/8863/dino.gif -->
-                        <br><br>
-                    </div>
-
-                    <br>
-
-                    <div class="content-box" align="center">
-                        <div class="section-header">.: SPONSOR :.</div>
-                        <br>
-                        <button
-                            onclick="alert('CONGRATULATIONS! You are the 999,999th visitor! Click OK to claim your prize!')"
-                            style="background: #C0C0C0; border: 2px outset #fff; padding: 4px; color: black; cursor: pointer;">
-                            <b>CLICK HERE</b><br>
-                            <small>To Win A Free iPod!</small>
-                        </button>
-                        <br><br>
-                    </div>
-
-                    <br>
-
-                    <div class="content-box" align="center">
-                        <div class="section-header">.: STATS :.</div>
-                        <div
-                            style="font-family: 'Courier'; font-size: 10px; color: #00FF00; text-align: left; padding: 4px;">
-                            VISITORS: <font color="red" id="stats-visitors">1337</font><br>
-                            ONLINE: <span id="stats-online">1</span><br>
-                            MAKER: <font color="yellow">GEO SUBASH</font>
-                        </div>
-                    </div>
-                </td>
-
-                <!-- CENTER COLUMN: Main Content -->
-                <td valign="top">
-
-                    <!-- HOME VIEW -->
-                    <div id="view-home" class="view">
-                        <!-- WINAMP PLAYER -->
-                        <div id="winamp-player" class="player-frame">
-                            <table width="100%" cellpadding="2" cellspacing="0">
-                                <tr>
-                                    <td bgcolor="#000088"
-                                        style="color: white; font-weight: bold; font-family: Arial; font-size: 12px; padding: 2px;">
-                                        :: WINAMP 2.0 ::
-                                    </td>
-                                    <td bgcolor="#000088" align="right">
-                                        <button class="winamp-btn" style="width: 15px; height: 15px;"
-                                            onclick="toggleMinimize()">_</button>
-                                        <button class="winamp-btn" style="width: 15px; height: 15px;"
-                                            onclick="closePlayer()">X</button>
-                                    </td>
-                                </tr>
-                            </table>
-
-                            <div id="winamp-body" style="padding: 5px;">
-                                <!-- LCD -->
-                                <div id="lcd-display" class="lcd-display">POWER OFF</div>
-
-                                <!-- Visualizer -->
-                                <canvas id="visualizer-canvas" width="300" height="128"
-                                    style="background: black; width: 100%; height: 128px;"></canvas>
-
-                                <!-- Combined Controls (Playback + Volume) -->
-                                <table width="100%" border="0">
-                                    <tr>
-                                        <!-- Playback -->
-                                        <td align="left" width="60%">
-                                            <button class="winamp-btn" title="Previous"
-                                                onclick="prevStation()">|&lt;</button>
-                                            <button class="winamp-btn" title="Play" onclick="playMusic()">&gt;</button>
-                                            <button class="winamp-btn" title="Pause/Stop"
-                                                onclick="stopMusic()">||</button>
-                                            <button class="winamp-btn" title="Stop">[]</button>
-                                            <button class="winamp-btn" title="Next"
-                                                onclick="nextStation()">&gt;|</button>
-                                        </td>
-
-                                        <!-- Volume (Integrated) -->
-                                        <td align="right">
-                                            <font face="Courier New, monospace" size="1" color="#00FF00"
-                                                id="vol-display" style="margin-right: 5px; vertical-align: middle;">VOL:
-                                                |||||</font>
-                                            <button class="winamp-btn" onclick="adjustVolume(-0.1)">-</button>
-                                            <button class="winamp-btn" onclick="adjustVolume(0.1)">+</button>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div id="player-closed-msg" class="content-box hidden" align="center">
-                            <font color="red"><b>PLAYER CLOSED</b></font><br>
-                            <a href="#" onclick="relaunchPlayer(); return false;">[ RE-LAUNCH APPLICATION ]</a>
-                        </div>
-
-                        <br>
-
-                        <div class="content-box">
-                            <div class="section-header">.: STATION INFO :.</div>
-                            <table width="100%" cellpadding="4" border="1" bordercolor="#333333">
-                                <tr>
-                                    <td width="30%" bgcolor="#222222">
-                                        <font color="#AAAAAA" size="2"><b>Station Name:</b></font>
-                                    </td>
-                                    <td bgcolor="#000000">
-                                        <font color="#00FF00" face="Courier"><b id="info-name">LOADING...</b></font>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td bgcolor="#222222">
-                                        <font color="#AAAAAA" size="2"><b>Genre:</b></font>
-                                    </td>
-                                    <td bgcolor="#000000">
-                                        <font color="#CCCC00" face="Courier" id="info-genre">...</font>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td bgcolor="#222222">
-                                        <font color="#AAAAAA" size="2"><b>Origin:</b></font>
-                                    </td>
-                                    <td bgcolor="#000000">
-                                        <font color="#00FFFF" face="Courier" id="info-origin">...</font>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td bgcolor="#222222">
-                                        <font color="#AAAAAA" size="2"><b>Website:</b></font>
-                                    </td>
-                                    <td bgcolor="#000000"><a href="#" target="_blank" id="info-web">
-                                            <font size="2" id="info-web-text">...</font>
-                                        </a></td>
-                                </tr>
-                            </table>
-                        </div>
-
-                        <p align="center">
-                            <font face="Times New Roman" size="3" color="#CCCCCC">
-                                Welcome to my radio tuner! I made this using <b>HTML</b> and <b>JavaScript</b>.
-                                Please sign the <a href="#"
-                                    onclick="switchPage('guestbook'); return false;">Guestbook</a> if you like the
-                                tunes.
-                                <br><br>
-                                <i>"Music is the food of the soul" - Shakespeare (maybe)</i>
-                            </font>
-                        </p>
-
-                        <center>
-                            <img src="https://web.archive.org/web/20091027072936/http://geocities.com/Heartland/Bluffs/6207/under_construction_animated.gif"
-                                alt="Under Construction">
-                        </center>
-                    </div>
-
-                    <!-- STATIONS VIEW -->
-                    <div id="view-stations" class="view hidden">
-                        <div class="content-box">
-                            <div class="section-header">.: ALL FREQUENCIES :.</div>
-                            <table width="100%" cellpadding="3" border="1" bordercolor="#333" id="stations-table">
-                                <thead>
-                                    <tr bgcolor="#222">
-                                        <th>FREQ</th>
-                                        <th>NAME</th>
-                                        <th>GENRE</th>
-                                        <th>ACTION</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="stations-list">
-                                    <!-- Populated by JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- GUESTBOOK VIEW -->
-                    <div id="view-guestbook" class="view hidden">
-                        <div class="content-box">
-                            <div class="section-header">.: SIGN THE GUESTBOOK :.</div>
-                            <center>
-                                <p>Leave a mark on the digital frontier!</p>
-                                <form
-                                    onsubmit="alert('Thanks for signing! Your message (maybe) has been saved.'); return false;"
-                                    style="border: 2px dashed #444; padding: 10px; max-width: 300px;">
-                                    <table width="100%">
-                                        <tr>
-                                            <td align="right">Name:</td>
-                                            <td><input type="text" required style="width: 100%;"></td>
-                                        </tr>
-                                        <tr>
-                                            <td align="right" valign="top">Msg:</td>
-                                            <td><textarea rows="4" required style="width: 100%;"></textarea></td>
-                                        </tr>
-                                        <tr>
-                                            <td></td>
-                                            <td><button type="submit">SIGN IT!</button></td>
-                                        </tr>
-                                    </table>
-                                </form>
-                            </center>
-                        </div>
-                    </div>
-
-                    <!-- ABOUT VIEW -->
-                    <div id="view-about" class="view hidden">
-                        <div class="content-box">
-                            <div class="section-header">.: ABOUT GEO & THE RIG :.</div>
-                            <p>Hi! I'm Geo. I built this radio tuner to share the best vibes from around the planet.</p>
-                            <hr color="#444">
-                            <b>MY RIG SPECS:</b>
-                            <ul>
-                                <li>CPU: Intel Pentium III 800MHz</li>
-                                <li>RAM: 256MB SDRAM</li>
-                                <li>GPU: 3dfx Voodoo3 3000</li>
-                                <li>OS: Windows 98 SE</li>
-                                <li>Connection: 56k Modem (US Robotics)</li>
-                            </ul>
-                            <center>
-                                <img
-                                    src="https://web.archive.org/web/20090830064619/http://geocities.com/CollegePark/Dorm/6253/construction_bar.gif">
-                            </center>
-                        </div>
-                    </div>
-
-                    <!-- EMAIL VIEW -->
-                    <div id="view-email" class="view hidden">
-                        <div class="content-box">
-                            <div class="section-header">.: EMAIL ME :.</div>
-                            <center>
-                                <br><br>
-                                <img
-                                    src="https://web.archive.org/web/20091027083053/http://geocities.com/Athens/Acropolis/3368/emailme.gif">
-                                <br><br>
-                                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=geosubash@gmail.com"
-                                    target="_blank">geosubash@gmail.com</a>
-                                <br><br>
-                            </center>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-        </table>
-
-        <br>
-
-        <!-- WEBRING -->
-        <div class="content-box" align="center" style="max-width: 400px; margin: 0 auto;">
-            <font face="Courier" size="2" color="#AAAAAA">
-                [ THIS SITE IS PART OF THE ]<br>
-                <font size="4" color="orange"><b>🌟 RETRO WEBRING 🌟</b></font>
-            </font>
-            <br>
-            <table width="100%" border="0" style="margin-top: 5px;">
-                <tr>
-                    <td width="33%" align="center"><button class="winamp-btn" style="width: auto; padding: 2px 5px;"
-                            onclick="webring('PREV')">&lt; PREV</button></td>
-                    <td width="33%" align="center"><button class="winamp-btn" style="width: auto; padding: 2px 5px;"
-                            onclick="webring('RANDOM')">? RANDOM ?</button></td>
-                    <td width="33%" align="center"><button class="winamp-btn" style="width: auto; padding: 2px 5px;"
-                            onclick="webring('NEXT')">NEXT &gt;</button></td>
-                </tr>
-            </table>
-        </div>
-
-        <br>
-        <center>
-            <font size="1" color="#666666">
-                (C) 1999 Geocities Inc. & <b>Geo Subash</b>. All rights reserved. <br>
-                Best viewed with Netscape Navigator 4.0 at 800x600 resolution.
-            </font>
-        </center>
-        <br>
-
-    </div>
-
-    <script>
-        // --- CHANNEL CONFIGURATION (RESTORED ORIGINAL LINEUP) ---
-        const STATIONS = [
-            { freq: 87.5, name: "NIGHTWAVE", sub: "VAPORWAVE", geo: "Virtual", website: "radio.plaza.one", src: "https://radio.plaza.one/mp3" },
-            { freq: 88.5, name: "GROOVE SALAD", sub: "DOWNTEMPO", geo: "San Francisco", website: "somafm.com", src: "https://ice1.somafm.com/groovesalad-128-mp3" },
-            { freq: 89.5, name: "DRONE ZONE", sub: "AMBIENT", geo: "San Francisco", website: "somafm.com", src: "https://ice1.somafm.com/dronezone-128-mp3" },
-            { freq: 90.5, name: "DEF CON", sub: "INDUSTRIAL", geo: "San Francisco", website: "somafm.com", src: "https://ice1.somafm.com/defcon-128-mp3" },
-            { freq: 91.5, name: "PARADISE", sub: "ECLECTIC", geo: "California", website: "radioparadise.com", src: "https://stream.radioparadise.com/mp3-128" },
-            { freq: 92.5, name: "RP MELLOW", sub: "ACOUSTIC", geo: "California", website: "radioparadise.com", src: "https://stream.radioparadise.com/mellow-128" },
-            { freq: 93.5, name: "RP ROCK", sub: "CLASSIC", geo: "California", website: "radioparadise.com", src: "https://stream.radioparadise.com/rock-128" },
-            { freq: 94.5, name: "KEXP", sub: "SEATTLE", geo: "Seattle, WA", website: "kexp.org", src: "https://kexp.streamguys1.com/kexp128.mp3" },
-            { freq: 95.5, name: "WQXR", sub: "CLASSICAL", geo: "New York", website: "wqxr.org", src: "https://stream.wqxr.org/wqxr-web" },
-            { freq: 96.5, name: "HIRSCHMILCH", sub: "TECHNO", geo: "Germany", website: "hirschmilch.de", src: "https://hirschmilch.de:7000/electronic.mp3" },
-            { freq: 97.5, name: "PROGRESSIVE", sub: "TRANCE", geo: "Germany", website: "hirschmilch.de", src: "https://hirschmilch.de:7000/progressive.mp3" },
-            { freq: 98.5, name: "CHILLHOP", sub: "LOFI BEATS", geo: "Germany", website: "ilovemusic.de", src: "https://streams.ilovemusic.de/iloveradio17.mp3" },
-            { freq: 99.5, name: "POPTRON", sub: "ELECTRO", geo: "San Francisco", website: "somafm.com", src: "https://ice1.somafm.com/poptron-128-mp3" },
-            { freq: 100.5, name: "INDIE POP", sub: "NEW ROCK", geo: "San Francisco", website: "somafm.com", src: "https://ice1.somafm.com/indiepop-128-mp3" },
-            { freq: 101.5, name: "BBC WORLD", sub: "GLOBAL NEWS", geo: "London, UK", website: "bbc.co.uk", src: "https://stream.live.vc.bbcmedia.co.uk/bbc_world_service" },
-            { freq: 102.5, name: "COVERS", sub: "REMIXES", geo: "San Francisco", website: "somafm.com", src: "https://ice1.somafm.com/covers-128-mp3" },
-            { freq: 103.5, name: "SECRET AGENT", sub: "SPY THEME", geo: "San Francisco", website: "somafm.com", src: "https://ice1.somafm.com/secretagent-128-mp3" },
-            { freq: 104.5, name: "LUSH", sub: "VOCALS", geo: "San Francisco", website: "somafm.com", src: "https://ice1.somafm.com/lush-128-mp3" },
-            { freq: 105.5, name: "GOA SUBS", sub: "WORLD", geo: "San Francisco", website: "somafm.com", src: "https://ice1.somafm.com/suburbsofgoa-128-mp3" },
-            { freq: 106.5, name: "BEAT BLENDER", sub: "DEEP HOUSE", geo: "San Francisco", website: "somafm.com", src: "https://ice1.somafm.com/beatblender-128-mp3" }
-        ];
-
-        var WEBRING_SITES = [
-            { name: "Poolsuite", url: "https://poolsuite.net" },
-            { name: "Museum of Endangered Sounds", url: "http://savethesounds.info" },
-            { name: "Dialup.net", url: "https://dialup.net" },
-            { name: "Windows 93", url: "http://www.windows93.net" },
-            { name: "Camerons World", url: "https://www.cameronsworld.net" },
-            { name: "Space Jam", url: "https://www.spacejam.com/1996" },
-            { name: "ToastyTech", url: "http://toastytech.com" }
-        ];
-
-        // --- STATE ---
-        var currentStationIdx = 0;
-        var audio = new Audio();
-        audio.crossOrigin = "anonymous";
-        var isPlaying = false;
-        var audioContext, analyserL, analyserR, splitter, dataArrayL, dataArrayR, canvas, canvasCtx;
-        var webringIdx = 0;
-        var userPaused = false; // Track if user intentionally paused
-        var lastTime = 0; // For heartbeat check
-        var stuckCount = 0; // For heartbeat check
-
-
-
-        // --- INIT ---
-        function init() {
-            // Init Visitor Count
-            var visits = localStorage.getItem('aether_visitors') || 1337;
-            if (!sessionStorage.getItem('visit_counted')) {
-                visits++;
-                localStorage.setItem('aether_visitors', visits);
-                sessionStorage.setItem('visit_counted', 'true');
-            }
-            document.getElementById('stats-visitors').innerText = visits;
-
-            // Init Stations Table
-            var table = document.getElementById('stations-list');
-            for (var i = 0; i < STATIONS.length; i++) {
-                var s = STATIONS[i];
-                var row = table.insertRow();
-                row.innerHTML = '<td><font face="Courier" color="#FFFF00">' + s.freq + '</font></td>' +
-                    '<td><b>' + s.name + '</b></td>' +
-                    '<td><small>' + s.sub + '</small></td>' +
-                    '<td align="center"><button onclick="tuneStation(' + i + ')">TUNE IN</button></td>';
-            }
-
-            // Start Intervals
-            updateStationDisplay();
-            setInterval(updateStats, 5000);
-
-            // Start Title Scroller
-            var titleText = " ~*~ GEOCITIES ~*~ The Neighborhood for Retro Souls ~*~ CREATED BY GEO SUBASH ~*~ ";
-            setInterval(function () {
-                titleText = titleText.substring(1) + titleText.substring(0, 1);
-                document.title = titleText;
-            }, 200);
-
-
-
-            // Konami Code
-            var code = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"];
-            var codeIdx = 0;
-            document.addEventListener('keydown', function (e) {
-                if (e.key === code[codeIdx]) {
-                    codeIdx++;
-                    if (codeIdx === code.length) {
-                        toggleMatrixMode();
-                        codeIdx = 0;
-                    }
-                } else {
-                    codeIdx = 0;
-                }
-            });
-            // Setup Visualizer Canvas
-            canvas = document.getElementById('visualizer-canvas');
-            canvasCtx = canvas.getContext('2d');
-
-            // Register Service Worker
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('./sw.js').catch(err => console.error(err));
-            }
-
-            // Mobile UI Adjustments
-            const btn = document.getElementById('launch-link-text');
-            if (btn) btn.innerText = "INSTALL APP";
-        }
-
-        // --- PWA / POPUP MODE ---
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            // Update button text to indicate full install is available
-            const btn = document.getElementById('launch-link-text');
-            if (btn) btn.innerText = "INSTALL APP";
-            const link = document.getElementById('launch-link');
-            if (link) link.style.color = "cyan";
-        });
-
-        async function launchStandalone() {
-            // Priority 1: Try native PWA Install
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                deferredPrompt = null;
-                return;
-            }
-
-            // Priority 2: Manual Instructions for Mobile (since we can't always force it)
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-            if (isMobile) {
-                // Check if likely iOS
-                const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-                if (isIOS) {
-                    alert("TO INSTALL ON iPHONE/iPAD:\n\n1. Tap the 'Share' button (square with arrow)\n2. Scroll down and tap 'Add to Home Screen' (+)\n3. Launch from your home screen for the full experience!");
-                    return;
-                } else {
-                    // Android fallback if prompt didn't fire (rare but possible) or already installed
-                    alert("TO INSTALL ON ANDROID:\n\n1. Tap the browser menu (three dots)\n2. Tap 'Install App' or 'Add to Home Screen'\n\n(If you already installed it, look for 'Geocities Retro Radio' in your apps!)");
-                    return;
-                }
-            }
-
-            // Priority 3: Fallback to Popup Window (Desktop)
-            const width = 800;
-            const height = 600;
-            const left = (screen.width - width) / 2;
-            const top = (screen.height - height) / 2;
-
-            window.open(
-                window.location.href,
-                'GeocitiesRadio',
-                `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes,status=no,toolbar=no,menubar=no,location=no`
-            );
-        }
-
-        // --- NAVIGATION ---
-        function switchPage(viewId) {
-            var views = document.getElementsByClassName('view');
-            for (var i = 0; i < views.length; i++) {
-                views[i].classList.add('hidden');
-            }
-            document.getElementById('view-' + viewId).classList.remove('hidden');
-        }
-
-        // --- PLAYER ---
-        function updateStationDisplay() {
-            var s = STATIONS[currentStationIdx];
-            document.getElementById('info-name').innerText = s.name;
-            document.getElementById('info-genre').innerText = s.sub;
-            document.getElementById('info-origin').innerText = s.geo;
-            document.getElementById('info-web-text').innerText = s.website;
-            document.getElementById('info-web').href = s.website;
-
-            var lcd = document.getElementById('lcd-display');
-            if (isPlaying) {
-                lcd.innerText = s.freq + " FM - " + s.name + "\n" + "PLAYING | 128kbps | STEREO";
-            } else {
-                lcd.innerText = "POWER OFF\nREADY";
-            }
-
-
-        }
-
-        function tuneStation(idx) {
-            currentStationIdx = idx;
-            switchPage('home');
-            if (isPlaying) playMusic();
-            else updateStationDisplay();
-        }
-
-        function playMusic() {
-            if (!audioContext) {
-                // Init Web Audio API on first user interaction
-                var AudioContext = window.AudioContext || window.webkitAudioContext;
-                audioContext = new AudioContext();
-
-                splitter = audioContext.createChannelSplitter(2);
-                analyserL = audioContext.createAnalyser();
-                analyserR = audioContext.createAnalyser();
-
-                analyserL.fftSize = 256;
-                analyserR.fftSize = 256;
-
-                var source = audioContext.createMediaElementSource(audio);
-                source.connect(audioContext.destination); // Direct audio out
-                source.connect(splitter); // Branch for analysis
-
-                splitter.connect(analyserL, 0);
-                splitter.connect(analyserR, 1);
-
-                dataArrayL = new Uint8Array(analyserL.frequencyBinCount);
-                dataArrayR = new Uint8Array(analyserR.frequencyBinCount);
-
-                drawVisualizer();
-            }
-
-            if (audioContext.state === 'suspended') audioContext.resume();
-
-            userPaused = false; // Reset flag
-            audio.src = STATIONS[currentStationIdx].src;
-            audio.play().then(function () {
-                isPlaying = true;
-                updateStationDisplay();
-            }).catch(function (e) {
-                // Ignore "interrupted" errors caused by rapid station switching
-                if (e.message.includes("interrupted") || e.name === "AbortError") {
-                    console.log("Playback interrupted (switching stations): " + e.message);
-                } else {
-                    alert("Error tuning radio: " + e.message);
-                }
-            });
-        }
-
-        function stopMusic() {
-            userPaused = true; // Set flag so we don't auto-reconnect
-            audio.pause();
-            isPlaying = false;
-            updateStationDisplay();
-        }
-
-        function nextStation() {
-            currentStationIdx = (currentStationIdx + 1) % STATIONS.length;
-            if (isPlaying) playMusic();
-            else updateStationDisplay();
-        }
-
-        function prevStation() {
-            currentStationIdx = (currentStationIdx - 1 + STATIONS.length) % STATIONS.length;
-            if (isPlaying) playMusic();
-            else updateStationDisplay();
-        }
-
-        function setVolume(val) {
-            val = Math.max(0, Math.min(1, val));
-            audio.volume = val;
-            updateVolumeDisplay(val);
-        }
-
-        function adjustVolume(delta) {
-            setVolume(audio.volume + delta);
-        }
-
-        function updateVolumeDisplay(val) {
-            var bars = Math.round(val * 10);
-            var str = "VOL: ";
-            for (var i = 0; i < 10; i++) {
-                str += (i < bars) ? "|" : ".";
-            }
-            var el = document.getElementById('vol-display');
-            if (el) el.innerText = str;
-        }
-
-        function toggleMinimize() {
-            var body = document.getElementById('winamp-body');
-            if (body.style.display === 'none') {
-                body.style.display = 'block';
-            } else {
-                body.style.display = 'none';
-            }
-        }
-
-        function closePlayer() {
-            stopMusic();
-            document.getElementById('winamp-player').classList.add('hidden');
-            document.getElementById('player-closed-msg').classList.remove('hidden');
-            document.getElementById('relaunch-link').classList.remove('hidden');
-        }
-
-        function relaunchPlayer() {
-            document.getElementById('winamp-player').classList.remove('hidden');
-            document.getElementById('player-closed-msg').classList.add('hidden');
-            document.getElementById('relaunch-link').classList.add('hidden');
-        }
-
-        // --- VISUALIZER ---
-        // --- VISUALIZER ---
-        function drawVisualizer() {
-            requestAnimationFrame(drawVisualizer);
-
-            // 1. Resizing Logic (Always Run)
-            if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight) {
-                canvas.width = canvas.clientWidth;
-                canvas.height = canvas.clientHeight;
-            }
-
-            // 2. Clear Background (Always Run)
-            canvasCtx.fillStyle = '#000000';
-            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // 3. Draw Static UI (Grid, Labels, Axis) - Always Run
-            // --- CONSTANTS & CONFIG ---
-            var GAP = 10;
-            var numBars = 40;
-            var halfWidth = (canvas.width / 2) - (GAP / 2);
-            var barWidth = halfWidth / numBars;
-
-            // Grid
-            canvasCtx.strokeStyle = '#114411';
-            canvasCtx.lineWidth = 1;
-            canvasCtx.beginPath();
-            for (var y = 0.2; y < 1; y += 0.2) {
-                var yPos = canvas.height * (1 - y);
-                canvasCtx.moveTo(0, yPos);
-                canvasCtx.lineTo(canvas.width, yPos);
-            }
-            canvasCtx.stroke();
-
-            // Labels
-            var labels = ["60", "150", "400", "1k", "2.5k", "6k", "16k"];
-            canvasCtx.fillStyle = '#00FF00';
-            canvasCtx.font = '9px Courier New';
-            canvasCtx.textAlign = 'center';
-            for (var i = 0; i < labels.length; i++) {
-                var percent = (i + 0.5) / labels.length;
-                var xL = halfWidth - (percent * halfWidth);
-                canvasCtx.fillText(labels[i], xL, canvas.height - 2);
-                var xR = (canvas.width / 2) + (GAP / 2) + (percent * halfWidth);
-                canvasCtx.fillText(labels[i], xR, canvas.height - 2);
-            }
-
-            // Central Axis
-            canvasCtx.fillStyle = '#222';
-            canvasCtx.fillRect((canvas.width / 2) - (GAP / 2), 0, GAP, canvas.height);
-            canvasCtx.strokeStyle = '#00aa00';
-            canvasCtx.setLineDash([2, 2]);
-            canvasCtx.beginPath();
-            canvasCtx.moveTo(canvas.width / 2, 0);
-            canvasCtx.lineTo(canvas.width / 2, canvas.height);
-            canvasCtx.stroke();
-            canvasCtx.setLineDash([]);
-
-            // Draw Channel Labels (L / R)
-            canvasCtx.fillStyle = '#00FF00';
-            canvasCtx.font = 'bold 12px Courier New';
-            canvasCtx.fillText("L", 10, 15);
-            canvasCtx.fillText("R", canvas.width - 10, 15);
-
-            // 4. Audio Data Processing (Exit if no audio)
-            if (!analyserL || !analyserR) return;
-
-            // FFT Setup
-            var targetFFT = 2048;
-            if (analyserL.fftSize !== targetFFT) {
-                analyserL.fftSize = targetFFT;
-                analyserR.fftSize = targetFFT;
-                dataArrayL = new Uint8Array(analyserL.frequencyBinCount);
-                dataArrayR = new Uint8Array(analyserR.frequencyBinCount);
-            }
-
-            analyserL.getByteFrequencyData(dataArrayL);
-            analyserR.getByteFrequencyData(dataArrayR);
-
-            var sampleRate = audioContext.sampleRate;
-            var fftSize = analyserL.fftSize;
-            var binCount = analyserL.frequencyBinCount;
-
-            // --- PROCESS BARS (LOGARITHMIC MAPPING) ---
-            // Helper to get average energy for a frequency range
-            function getEnergy(dataArray, minFreq, maxFreq) {
-                var startBin = Math.floor(minFreq * fftSize / sampleRate);
-                var endBin = Math.floor(maxFreq * fftSize / sampleRate);
-                if (endBin <= startBin) endBin = startBin + 1;
-
-                var sum = 0;
-                for (var b = startBin; b < endBin; b++) {
-                    if (b < binCount) sum += dataArray[b];
-                }
-                return sum / (endBin - startBin);
-            }
-
-            // Log Scale Calculation
-            var minLog = Math.log10(20);
-            var maxLog = Math.log10(20000);
-            var rangeLog = maxLog - minLog;
-
-            for (var i = 0; i < numBars; i++) {
-                // Logarithmic frequency bounds for this bar
-                var lowT = (i / numBars);
-                var highT = ((i + 1) / numBars);
-
-                var lowFreq = Math.pow(10, minLog + (lowT * rangeLog));
-                var highFreq = Math.pow(10, minLog + (highT * rangeLog));
-
-                var valL = getEnergy(dataArrayL, lowFreq, highFreq);
-                var valR = getEnergy(dataArrayR, lowFreq, highFreq);
-
-                // Fake data for silence if not playing but "active"
-                if (!isPlaying && !hasSignal(dataArrayL) && !hasSignal(dataArrayR)) {
-                    valL = 0; valR = 0;
-                } else if (isPlaying && valL === 0 && valR === 0) {
-                    // Minor jitter for "alive" feel
-                    valL = Math.random() * 10;
-                    valR = Math.random() * 10;
-                }
-
-                // Render Left Channel (Left Side, Right-to-Left)
-                // Bar 0 is Bass (Center), Bar N is Treble (Edge)
-                var hL = (valL / 255) * (canvas.height - 15); // Reserved space for text
-                var xL = halfWidth - ((i + 1) * barWidth);
-
-                canvasCtx.fillStyle = '#00CC00'; // Darker base
-                canvasCtx.fillRect(xL, canvas.height - 15 - hL, barWidth - 1, hL);
-                // Top Highlight
-                canvasCtx.fillStyle = '#CCFFCC';
-                if (hL > 2) canvasCtx.fillRect(xL, canvas.height - 15 - hL, barWidth - 1, 2);
-
-                // Render Right Channel (Right Side, Left-to-Right)
-                var hR = (valR / 255) * (canvas.height - 15);
-                var xR = (canvas.width / 2) + (GAP / 2) + (i * barWidth);
-
-                canvasCtx.fillStyle = '#00CC00';
-                canvasCtx.fillRect(xR, canvas.height - 15 - hR, barWidth - 1, hR);
-                // Top Highlight
-                canvasCtx.fillStyle = '#CCFFCC';
-                if (hR > 2) canvasCtx.fillRect(xR, canvas.height - 15 - hR, barWidth - 1, 2);
-            }
-
-            // Central Axis
-            canvasCtx.fillStyle = '#222';
-            canvasCtx.fillRect((canvas.width / 2) - (GAP / 2), 0, GAP, canvas.height);
-            // Center Line
-            canvasCtx.strokeStyle = '#00aa00';
-            canvasCtx.setLineDash([2, 2]);
-            canvasCtx.beginPath();
-            canvasCtx.moveTo(canvas.width / 2, 0);
-            canvasCtx.lineTo(canvas.width / 2, canvas.height);
-            canvasCtx.stroke();
-            canvasCtx.setLineDash([]);
-        }
-
-        function hasSignal(arr) {
-            for (var i = 0; i < arr.length; i++) if (arr[i] > 0) return true;
-            return false;
-        }
-
-
-
-        // --- WEBRING ---
-        // --- WEBRING ---
-        function webring(action) {
-            if (action === 'NEXT') webringIdx = (webringIdx + 1) % WEBRING_SITES.length;
-            else if (action === 'PREV') webringIdx = (webringIdx - 1 + WEBRING_SITES.length) % WEBRING_SITES.length;
-            else webringIdx = Math.floor(Math.random() * WEBRING_SITES.length);
-
-            var site = WEBRING_SITES[webringIdx];
-            window.open(site.url, '_blank');
-        }
-
-        // --- STATS ---
-        function updateStats() {
-            var online = Math.floor(Math.random() * 50) + 1;
-            document.getElementById('stats-online').innerText = online;
-        }
-
-        // --- MATRIX MODE ---
-        function toggleMatrixMode() {
-            document.body.classList.toggle('matrix-mode');
-            alert("*** ACCESS GRANTED: WELCOME TO THE MATRIX ***");
-        }
-    </script>
-</body>
-
-</html>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>~*~ GEOCITIES ~*~ The Neighborhood for Retro Souls ~*~</TITLE>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<META NAME="description" CONTENT="Geo's Internet Radio Tuner - the best high-fidelity broadcasts on the World Wide Web!">
+<META NAME="keywords" CONTENT="radio, mp3, winamp, music, vaporwave, ambient, techno, geocities, geo subash, webring">
+<META NAME="author" CONTENT="Geo Subash">
+<META NAME="generator" CONTENT="Notepad">
+<!-- this page is 800 pixels wide. phones get the whole page, just smaller - like the old days -->
+<META NAME="viewport" CONTENT="width=800">
+<META NAME="theme-color" CONTENT="#000044">
+<META NAME="apple-mobile-web-app-capable" CONTENT="yes">
+<META NAME="mobile-web-app-capable" CONTENT="yes">
+<META NAME="apple-mobile-web-app-status-bar-style" CONTENT="black">
+<META NAME="apple-mobile-web-app-title" CONTENT="RetroRadio">
+<LINK REL="manifest" HREF="manifest.json">
+<LINK REL="shortcut icon" HREF="favicon.ico">
+<LINK REL="apple-touch-icon" HREF="images/icon-192.png">
+
+<STYLE TYPE="text/css">
+<!--
+BODY {
+  scrollbar-face-color: #000066;
+  scrollbar-arrow-color: #FFFF00;
+  scrollbar-track-color: #000022;
+  scrollbar-shadow-color: #000000;
+  scrollbar-highlight-color: #6666FF;
+  scrollbar-3dlight-color: #000000;
+  scrollbar-darkshadow-color: #000000;
+}
+HTML { scrollbar-color: #6666FF #000022; }
+
+A:link    { color: #FFFF00; text-decoration: none; }
+A:visited { color: #FF99FF; text-decoration: none; }
+A:hover   { color: #FF0000; text-decoration: underline; }
+A:active  { color: #FFFFFF; }
+
+IMG { border: 0; }
+
+/* box titles ".: LIKE THIS :." */
+.hdr {
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  font-weight: bold;
+  color: #FFFFFF;
+  background-color: #000099;
+  text-align: center;
+  padding: 3px;
+  border-top: 1px solid #8888FF;
+  border-bottom: 1px solid #000033;
+}
+
+/* winamp look */
+.wabtn {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  font-weight: bold;
+  color: #000000;
+  background-color: #BDBDC6;
+  border: 2px outset #FFFFFF;
+  width: 30px;
+  height: 20px;
+  padding: 0;
+  cursor: pointer;
+}
+.wabtn:active { border: 2px inset #FFFFFF; }
+.wasmall { width: 14px; height: 13px; font-size: 9px; line-height: 9px; border-width: 1px; }
+.lcd {
+  font-family: 'Courier New', Courier, monospace;
+  color: #00FF00;
+}
+#lcd-ticker { white-space: pre; font-size: 12px; }
+#vis { image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+.volcell { cursor: pointer; font-size: 1px; }
+
+.oldbtn {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  background-color: #C0C0C0;
+  color: #000000;
+  border: 2px outset #FFFFFF;
+  cursor: pointer;
+}
+.oldbtn:active { border: 2px inset #FFFFFF; }
+
+INPUT.field, TEXTAREA.field, SELECT.field {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12px;
+  background-color: #000000;
+  color: #00FF00;
+  border: 2px inset #6666FF;
+}
+
+/* hidden easter egg - up up down down left right left right b a */
+BODY.matrix, BODY.matrix * {
+  background-color: #000000 !important;
+  background-image: none !important;
+  color: #00FF00 !important;
+  border-color: #00FF00 !important;
+  font-family: 'Courier New', Courier, monospace !important;
+}
+-->
+</STYLE>
+</HEAD>
+
+<BODY BGCOLOR="#000000" BACKGROUND="images/stars.jpg" TEXT="#CCCCCC" LINK="#FFFF00" VLINK="#FF99FF" ALINK="#FFFFFF"
+      TOPMARGIN="0" LEFTMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" onLoad="init()">
+
+<NOSCRIPT>
+<CENTER><TABLE WIDTH="760" BGCOLOR="#FF0000" CELLPADDING="6"><TR><TD ALIGN="center">
+<FONT FACE="Arial" SIZE="2" COLOR="#FFFFFF"><B>WHOOPS! You need JavaScript turned on to hear the radio.
+Please upgrade to Netscape Navigator 4.0 or Internet Explorer 5!</B></FONT>
+</TD></TR></TABLE></CENTER>
+</NOSCRIPT>
+
+<A NAME="top"></A>
+<CENTER>
+<BR>
+
+<!-- ================================================================== -->
+<!-- OUTER FRAME: 760 wide so it fits a 800x600 monitor with scrollbar  -->
+<!-- ================================================================== -->
+<TABLE WIDTH="760" BORDER="0" CELLPADDING="0" CELLSPACING="0" BGCOLOR="#6666FF">
+<TR><TD>
+<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="2">
+
+<!-- ======================= HEADER ======================= -->
+<TR><TD BGCOLOR="#000044">
+  <TABLE WIDTH="100%" BORDER="0" CELLPADDING="4" CELLSPACING="0">
+  <TR>
+    <TD WIDTH="90" ALIGN="center" VALIGN="bottom"><IMG SRC="picmix.com_68043.gif" WIDTH="64" HEIGHT="110" ALT="Hello!"></TD>
+    <TD ALIGN="center" VALIGN="middle">
+      <IMG SRC="images/flame.gif" WIDTH="40" HEIGHT="64" ALT="" ALIGN="absmiddle"><IMG SRC="images/title.gif" WIDTH="380" HEIGHT="64" ALT="GEOCITIES" ALIGN="absmiddle"><IMG SRC="images/flame.gif" WIDTH="40" HEIGHT="64" ALT="" ALIGN="absmiddle"><BR>
+      <FONT FACE="Times New Roman, Times, serif" SIZE="3" COLOR="#FFFF00"><I>~ The Best High-Fidelity Broadcasts on the World Wide Web ~</I></FONT><BR>
+      <FONT FACE="Verdana, Arial, Helvetica" SIZE="1" COLOR="#8888FF">a Geo Subash production &nbsp;*&nbsp; est. 1999</FONT>
+    </TD>
+    <TD WIDTH="90" ALIGN="center" VALIGN="bottom"><IMG SRC="picmix.com_68043.gif" WIDTH="64" HEIGHT="110" ALT="Hello!"></TD>
+  </TR>
+  </TABLE>
+</TD></TR>
+
+<!-- ======================= NAV BAR ======================= -->
+<TR><TD BGCOLOR="#000022">
+  <TABLE WIDTH="100%" BORDER="0" CELLPADDING="4" CELLSPACING="1">
+  <TR>
+    <TD ID="nav-home"      WIDTH="16%" ALIGN="center" BGCOLOR="#000066"><FONT FACE="Verdana, Arial" SIZE="1"><B><A HREF="#home">[ HOME ]</A></B></FONT></TD>
+    <TD ID="nav-stations"  WIDTH="17%" ALIGN="center" BGCOLOR="#000066"><FONT FACE="Verdana, Arial" SIZE="1"><B><A HREF="#stations">[ STATIONS ]</A></B></FONT></TD>
+    <TD ID="nav-about"     WIDTH="17%" ALIGN="center" BGCOLOR="#000066"><FONT FACE="Verdana, Arial" SIZE="1"><B><A HREF="#about">[ ABOUT ME ]</A></B></FONT></TD>
+    <TD ID="nav-links"     WIDTH="17%" ALIGN="center" BGCOLOR="#000066"><FONT FACE="Verdana, Arial" SIZE="1"><B><A HREF="#links">[ COOL LINKS ]</A></B></FONT></TD>
+    <TD ID="nav-guestbook" WIDTH="17%" ALIGN="center" BGCOLOR="#000066"><FONT FACE="Verdana, Arial" SIZE="1"><B><A HREF="#guestbook">[ GUESTBOOK ]</A></B></FONT></TD>
+    <TD ID="nav-email"     WIDTH="16%" ALIGN="center" BGCOLOR="#000066"><FONT FACE="Verdana, Arial" SIZE="1"><B><A HREF="#email">[ EMAIL ME ]</A></B></FONT></TD>
+  </TR>
+  </TABLE>
+</TD></TR>
+
+<!-- ======================= MARQUEE ======================= -->
+<TR><TD BGCOLOR="#000000">
+  <FONT FACE="Courier New, Courier" SIZE="2" COLOR="#FFFFFF">
+  <MARQUEE SCROLLAMOUNT="4" SCROLLDELAY="60" BEHAVIOR="scroll">
+  *** WELCOME TO GEOCITIES *** MADE BY GEO SUBASH *** NEW STATION ADDED: NIGHTWAVE (VAPORWAVE) ***
+  PRESS Z X C V B ON YOUR KEYBOARD TO WORK THE RADIO JUST LIKE WINAMP ***
+  DON'T FORGET TO SIGN THE GUESTBOOK ***
+  </MARQUEE>
+  </FONT>
+</TD></TR>
+
+<!-- ======================= BODY ======================= -->
+<TR><TD BGCOLOR="#000033">
+<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
+<TR>
+
+<!-- ********** LEFT COLUMN ********** -->
+<TD WIDTH="150" VALIGN="top" BGCOLOR="#000044">
+<TABLE WIDTH="150" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD>
+
+  <!-- site menu -->
+  <TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#333399" CELLPADDING="0" CELLSPACING="0" BGCOLOR="#000022">
+  <TR><TD CLASS="hdr">.: SITE MENU :.</TD></TR>
+  <TR><TD>
+    <TABLE WIDTH="100%" BORDER="0" CELLPADDING="3" CELLSPACING="0">
+    <TR><TD WIDTH="14"><IMG SRC="images/bullet.gif" WIDTH="12" HEIGHT="12" ALT="*"></TD><TD><FONT FACE="Verdana, Arial" SIZE="1"><A HREF="#home">Main Page</A></FONT></TD></TR>
+    <TR><TD><IMG SRC="images/bullet.gif" WIDTH="12" HEIGHT="12" ALT="*"></TD><TD><FONT FACE="Verdana, Arial" SIZE="1"><A HREF="#stations">All Stations</A></FONT></TD></TR>
+    <TR><TD><IMG SRC="images/bullet.gif" WIDTH="12" HEIGHT="12" ALT="*"></TD><TD><FONT FACE="Verdana, Arial" SIZE="1"><A HREF="#about">About Geo</A></FONT></TD></TR>
+    <TR><TD><IMG SRC="images/bullet.gif" WIDTH="12" HEIGHT="12" ALT="*"></TD><TD><FONT FACE="Verdana, Arial" SIZE="1"><A HREF="#about">My Rig</A></FONT></TD></TR>
+    <TR><TD><IMG SRC="images/bullet.gif" WIDTH="12" HEIGHT="12" ALT="*"></TD><TD><FONT FACE="Verdana, Arial" SIZE="1"><A HREF="#links">Cool Links</A></FONT></TD></TR>
+    <TR><TD><IMG SRC="images/bullet.gif" WIDTH="12" HEIGHT="12" ALT="*"></TD><TD><FONT FACE="Verdana, Arial" SIZE="1"><A HREF="#guestbook">Guestbook</A></FONT></TD></TR>
+    <TR><TD><IMG SRC="images/bullet.gif" WIDTH="12" HEIGHT="12" ALT="*"></TD><TD><FONT FACE="Verdana, Arial" SIZE="1"><A HREF="#email">Email Me</A></FONT></TD></TR>
+    <TR ID="launch-row"><TD><IMG SRC="images/bullet.gif" WIDTH="12" HEIGHT="12" ALT="*"></TD><TD><FONT FACE="Verdana, Arial" SIZE="1"><A HREF="#" onClick="launchStandalone(); return false;"><FONT COLOR="#00FF00"><B ID="launch-text">POP-UP PLAYER</B></FONT></A></FONT></TD></TR>
+    </TABLE>
+  </TD></TR>
+  </TABLE>
+
+  <BR>
+
+  <!-- virtual pet -->
+  <TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#333399" CELLPADDING="0" CELLSPACING="0" BGCOLOR="#000022">
+  <TR><TD CLASS="hdr">.: VIRTUAL DINO :.</TD></TR>
+  <TR><TD ALIGN="center">
+    <BR>
+    <A HREF="#" onClick="petDino('pet'); return false;" TITLE="Pet Byte!"><IMG SRC="images/dino.gif" WIDTH="104" HEIGHT="88" ALT="Byte the dino"></A><BR>
+    <FONT FACE="Verdana, Arial" SIZE="1" COLOR="#FFFFFF"><B>BYTE</B></FONT><BR>
+    <FONT FACE="Courier New, Courier" SIZE="1" COLOR="#00FF00">
+    FOOD <SPAN ID="dino-food">[#####]</SPAN><BR>
+    LOVE <SPAN ID="dino-love">[#####]</SPAN>
+    </FONT><BR>
+    <FONT FACE="Verdana, Arial" SIZE="1" COLOR="#FFFF00" ID="dino-msg">Rawr! Hi there!</FONT><BR>
+    <INPUT TYPE="button" CLASS="oldbtn" VALUE="FEED" onClick="petDino('feed')">
+    <INPUT TYPE="button" CLASS="oldbtn" VALUE="PET" onClick="petDino('pet')">
+    <BR><BR>
+  </TD></TR>
+  </TABLE>
+
+  <BR>
+
+  <!-- sponsor -->
+  <TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#333399" CELLPADDING="0" CELLSPACING="0" BGCOLOR="#000022">
+  <TR><TD CLASS="hdr">.: SPONSOR :.</TD></TR>
+  <TR><TD ALIGN="center">
+    <BR>
+    <BUTTON CLASS="oldbtn" STYLE="padding: 4px;" onClick="alert('CONGRATULATIONS!!!\n\nYou are the 1,000,000th visitor!\nClick OK to claim your FREE 56K MODEM!\n\n(just kidding. thanks for visiting!)')">
+      <FONT COLOR="#FF0000"><B>CLICK HERE!!!</B></FONT><BR>
+      <FONT SIZE="1">You are a WINNER!</FONT>
+    </BUTTON>
+    <BR><BR>
+  </TD></TR>
+  </TABLE>
+
+</TD></TR></TABLE>
+</TD>
+
+<!-- ********** CENTER COLUMN ********** -->
+<TD WIDTH="452" VALIGN="top" BGCOLOR="#000033" STYLE="border-left: 2px ridge #6666FF; border-right: 2px ridge #6666FF;">
+<TABLE WIDTH="100%" BORDER="0" CELLPADDING="6" CELLSPACING="0"><TR><TD>
+
+  <!-- ===================== WINAMP 2.0 ===================== -->
+  <!-- lives outside the pages so the music keeps going when you click around -->
+  <TABLE ID="winamp" WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0" BGCOLOR="#29293A" STYLE="border: 2px outset #8888AA;">
+  <TR><TD>
+    <!-- title bar -->
+    <TABLE WIDTH="100%" BORDER="0" CELLPADDING="2" CELLSPACING="0" BGCOLOR="#000088">
+    <TR>
+      <TD><FONT FACE="Arial, Helvetica" SIZE="1" COLOR="#FFFFFF"><B>&nbsp;:: WINAMP 2.0 :: GEO RADIO ::</B></FONT></TD>
+      <TD ALIGN="right" NOWRAP>
+        <INPUT TYPE="button" CLASS="wabtn wasmall" VALUE="_" TITLE="Windowshade (minimize)" onClick="toggleShade()"><INPUT TYPE="button" CLASS="wabtn wasmall" VALUE="x" TITLE="Close" onClick="closePlayer()">
+      </TD>
+    </TR>
+    </TABLE>
+
+    <DIV ID="winamp-body">
+    <TABLE WIDTH="100%" BORDER="0" CELLPADDING="4" CELLSPACING="0">
+    <TR><TD>
+
+      <!-- LCD -->
+      <TABLE WIDTH="100%" BORDER="0" CELLPADDING="3" CELLSPACING="0" BGCOLOR="#000000" STYLE="border: 2px inset #555566;">
+      <TR>
+        <TD WIDTH="96" ROWSPAN="2" ALIGN="center" VALIGN="middle" CLASS="lcd" STYLE="border-right: 1px solid #113311;">
+          <FONT FACE="Courier New, Courier" SIZE="1" COLOR="#00FF00"><B ID="lcd-state">STOP</B></FONT><BR>
+          <FONT FACE="Courier New, Courier" SIZE="6" COLOR="#00FF00"><B ID="lcd-time">00:00</B></FONT>
+        </TD>
+        <TD CLASS="lcd"><SPAN ID="lcd-ticker">*** GEO RADIO *** PRESS PLAY ***</SPAN></TD>
+      </TR>
+      <TR>
+        <TD CLASS="lcd">
+          <FONT FACE="Courier New, Courier" SIZE="1">
+          <FONT COLOR="#00FF00" ID="lcd-freq">87.5</FONT> <FONT COLOR="#008800">FM</FONT> &nbsp;
+          <FONT COLOR="#00FF00">128</FONT> <FONT COLOR="#008800">kbps</FONT> &nbsp;
+          <FONT COLOR="#00FF00">44</FONT> <FONT COLOR="#008800">kHz</FONT> &nbsp;
+          <FONT COLOR="#004400" ID="lcd-stereo">STEREO</FONT>
+          </FONT>
+        </TD>
+      </TR>
+      </TABLE>
+
+      <!-- spectrum analyzer -->
+      <TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0" BGCOLOR="#000000" STYLE="border: 2px inset #555566; margin-top: 4px;">
+      <TR>
+        <TD WIDTH="10" ALIGN="center" VALIGN="top"><FONT FACE="Courier New" SIZE="1" COLOR="#00AA00"><B>L</B></FONT></TD>
+        <TD ALIGN="center"><CANVAS ID="vis" WIDTH="200" HEIGHT="40" STYLE="width: 400px; height: 80px;"></CANVAS></TD>
+        <TD WIDTH="10" ALIGN="center" VALIGN="top"><FONT FACE="Courier New" SIZE="1" COLOR="#00AA00"><B>R</B></FONT></TD>
+      </TR>
+      </TABLE>
+
+      <!-- buttons + volume -->
+      <TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0" STYLE="margin-top: 5px;">
+      <TR>
+        <TD NOWRAP>
+          <INPUT TYPE="button" CLASS="wabtn" VALUE="|&lt;" TITLE="Previous station (Z)" onClick="prevStation()"><INPUT
+                 TYPE="button" CLASS="wabtn" VALUE="&gt;" TITLE="Play (X)" onClick="playMusic()"><INPUT
+                 TYPE="button" CLASS="wabtn" VALUE="||" TITLE="Pause (C)" onClick="pauseMusic()"><INPUT
+                 TYPE="button" CLASS="wabtn" VALUE="[]" TITLE="Stop (V)" onClick="stopMusic()"><INPUT
+                 TYPE="button" CLASS="wabtn" VALUE="&gt;|" TITLE="Next station (B)" onClick="nextStation()">
+          &nbsp;<INPUT TYPE="button" CLASS="wabtn" VALUE="^" TITLE="Open station list" onClick="goPage('stations')">
+        </TD>
+        <TD ALIGN="right" NOWRAP>
+          <FONT FACE="Courier New, Courier" SIZE="1" COLOR="#00FF00"><B>VOL</B></FONT>
+          <INPUT TYPE="button" CLASS="wabtn wasmall" VALUE="-" TITLE="Volume down (-)" onClick="adjustVolume(-1)">
+        </TD>
+        <TD WIDTH="72" ALIGN="center">
+          <!-- ten little blocks you can click, like a real volume slider -->
+          <TABLE BORDER="0" CELLPADDING="0" CELLSPACING="1" BGCOLOR="#000000" STYLE="border: 1px inset #555566;">
+          <TR ID="vol-bar"></TR>
+          </TABLE>
+        </TD>
+        <TD WIDTH="16" ALIGN="left">
+          <INPUT TYPE="button" CLASS="wabtn wasmall" VALUE="+" TITLE="Volume up (+)" onClick="adjustVolume(1)">
+        </TD>
+      </TR>
+      </TABLE>
+
+      <FONT FACE="Verdana, Arial" SIZE="1" COLOR="#8888AA" ID="wa-status">Keys: Z=prev X=play C=pause V=stop B=next +/- volume</FONT>
+
+    </TD></TR>
+    </TABLE>
+    </DIV>
+  </TD></TR>
+  </TABLE>
+
+  <TABLE ID="player-closed" WIDTH="100%" BORDER="1" BORDERCOLOR="#333399" CELLPADDING="8" CELLSPACING="0" BGCOLOR="#000022" STYLE="display: none;">
+  <TR><TD ALIGN="center">
+    <FONT FACE="Arial" SIZE="2" COLOR="#FF0000"><B>PLAYER CLOSED</B></FONT><BR>
+    <FONT FACE="Verdana, Arial" SIZE="1"><A HREF="#" onClick="openPlayer(); return false;">[ RE-LAUNCH WINAMP ]</A></FONT>
+  </TD></TR>
+  </TABLE>
+
+  <BR>
+  <CENTER><IMG SRC="images/rainbow.gif" WIDTH="440" HEIGHT="6" ALT="----------"></CENTER>
+  <BR>
+
+  <!-- ===================== PAGE: HOME ===================== -->
+  <DIV ID="page-home">
+    <TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#333399" CELLPADDING="0" CELLSPACING="0" BGCOLOR="#000022">
+    <TR><TD CLASS="hdr">.: NOW TUNED TO :.</TD></TR>
+    <TR><TD>
+      <TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#222244" CELLPADDING="4" CELLSPACING="0">
+      <TR>
+        <TD WIDTH="30%" BGCOLOR="#222222"><FONT FACE="Arial" SIZE="2" COLOR="#AAAAAA"><B>Station:</B></FONT></TD>
+        <TD BGCOLOR="#000000"><FONT FACE="Courier New, Courier" SIZE="2" COLOR="#00FF00"><B ID="info-name">...</B></FONT></TD>
+      </TR>
+      <TR>
+        <TD BGCOLOR="#222222"><FONT FACE="Arial" SIZE="2" COLOR="#AAAAAA"><B>Genre:</B></FONT></TD>
+        <TD BGCOLOR="#000000"><FONT FACE="Courier New, Courier" SIZE="2" COLOR="#CCCC00" ID="info-genre">...</FONT></TD>
+      </TR>
+      <TR>
+        <TD BGCOLOR="#222222"><FONT FACE="Arial" SIZE="2" COLOR="#AAAAAA"><B>Origin:</B></FONT></TD>
+        <TD BGCOLOR="#000000"><FONT FACE="Courier New, Courier" SIZE="2" COLOR="#00FFFF" ID="info-origin">...</FONT></TD>
+      </TR>
+      <TR>
+        <TD BGCOLOR="#222222"><FONT FACE="Arial" SIZE="2" COLOR="#AAAAAA"><B>Website:</B></FONT></TD>
+        <TD BGCOLOR="#000000"><FONT FACE="Courier New, Courier" SIZE="2"><A HREF="#" TARGET="_blank" ID="info-web">...</A></FONT></TD>
+      </TR>
+      </TABLE>
+    </TD></TR>
+    </TABLE>
+
+    <P ALIGN="center">
+    <FONT FACE="Times New Roman, Times, serif" SIZE="3" COLOR="#CCCCCC">
+    Welcome to my radio tuner!! I made this myself using <B>HTML</B> and <B>JavaScript</B>.
+    Hit the <FONT COLOR="#00FF00"><B>&gt;</B></FONT> button on the player to start the music,
+    or <A HREF="#stations">pick a station</A> from the list.
+    Please sign my <A HREF="#guestbook">Guestbook</A> if you like the tunes!
+    <BR><BR>
+    <I>"Music is the food of the soul" - Shakespeare (maybe)</I>
+    </FONT>
+    </P>
+
+    <CENTER><IMG SRC="images/construction.gif" WIDTH="400" HEIGHT="34" ALT="UNDER CONSTRUCTION"></CENTER>
+  </DIV>
+
+  <!-- ===================== PAGE: STATIONS ===================== -->
+  <DIV ID="page-stations" STYLE="display: none;">
+    <TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#333399" CELLPADDING="0" CELLSPACING="0" BGCOLOR="#000022">
+    <TR><TD CLASS="hdr">.: ALL FREQUENCIES :.</TD></TR>
+    <TR><TD>
+      <TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#222244" CELLPADDING="3" CELLSPACING="0">
+      <THEAD>
+      <TR BGCOLOR="#222222">
+        <TH WIDTH="14"></TH>
+        <TH><FONT FACE="Arial" SIZE="1" COLOR="#AAAAAA">FREQ</FONT></TH>
+        <TH><FONT FACE="Arial" SIZE="1" COLOR="#AAAAAA">NAME</FONT></TH>
+        <TH><FONT FACE="Arial" SIZE="1" COLOR="#AAAAAA">GENRE</FONT></TH>
+        <TH><FONT FACE="Arial" SIZE="1" COLOR="#AAAAAA">&nbsp;</FONT></TH>
+      </TR>
+      </THEAD>
+      <TBODY ID="station-list"></TBODY>
+      </TABLE>
+    </TD></TR>
+    </TABLE>
+    <P ALIGN="center"><FONT FACE="Verdana, Arial" SIZE="1" COLOR="#8888AA">Click any row to tune in. Streams are live from the stations' own servers.</FONT></P>
+  </DIV>
+
+  <!-- ===================== PAGE: ABOUT ===================== -->
+  <DIV ID="page-about" STYLE="display: none;">
+    <TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#333399" CELLPADDING="0" CELLSPACING="0" BGCOLOR="#000022">
+    <TR><TD CLASS="hdr">.: ABOUT GEO &amp; THE RIG :.</TD></TR>
+    <TR><TD>
+      <TABLE WIDTH="100%" BORDER="0" CELLPADDING="8" CELLSPACING="0"><TR><TD>
+      <FONT FACE="Times New Roman, Times, serif" SIZE="3">
+      Hi!! I'm <B>Geo</B>. I built this radio tuner to share the best vibes from around the planet.
+      When I'm not coding I'm probably listening to vaporwave at 3am. Thanks for stopping by my little corner of the web!
+      </FONT>
+      <HR SIZE="1" COLOR="#444466" NOSHADE>
+      <FONT FACE="Verdana, Arial" SIZE="2" COLOR="#FFFF00"><B>MY RIG SPECS:</B></FONT>
+      <TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#222244" CELLPADDING="3" CELLSPACING="0" STYLE="margin-top: 4px;">
+      <TR><TD WIDTH="35%" BGCOLOR="#222222"><FONT FACE="Arial" SIZE="2" COLOR="#AAAAAA">CPU</FONT></TD><TD BGCOLOR="#000000"><FONT FACE="Courier New" SIZE="2" COLOR="#00FF00">Intel Pentium III 800MHz</FONT></TD></TR>
+      <TR><TD BGCOLOR="#222222"><FONT FACE="Arial" SIZE="2" COLOR="#AAAAAA">RAM</FONT></TD><TD BGCOLOR="#000000"><FONT FACE="Courier New" SIZE="2" COLOR="#00FF00">256MB SDRAM</FONT></TD></TR>
+      <TR><TD BGCOLOR="#222222"><FONT FACE="Arial" SIZE="2" COLOR="#AAAAAA">Video</FONT></TD><TD BGCOLOR="#000000"><FONT FACE="Courier New" SIZE="2" COLOR="#00FF00">3dfx Voodoo3 3000</FONT></TD></TR>
+      <TR><TD BGCOLOR="#222222"><FONT FACE="Arial" SIZE="2" COLOR="#AAAAAA">Sound</FONT></TD><TD BGCOLOR="#000000"><FONT FACE="Courier New" SIZE="2" COLOR="#00FF00">Sound Blaster Live!</FONT></TD></TR>
+      <TR><TD BGCOLOR="#222222"><FONT FACE="Arial" SIZE="2" COLOR="#AAAAAA">Monitor</FONT></TD><TD BGCOLOR="#000000"><FONT FACE="Courier New" SIZE="2" COLOR="#00FF00">15" CRT @ 800x600</FONT></TD></TR>
+      <TR><TD BGCOLOR="#222222"><FONT FACE="Arial" SIZE="2" COLOR="#AAAAAA">OS</FONT></TD><TD BGCOLOR="#000000"><FONT FACE="Courier New" SIZE="2" COLOR="#00FF00">Windows 98 SE</FONT></TD></TR>
+      <TR><TD BGCOLOR="#222222"><FONT FACE="Arial" SIZE="2" COLOR="#AAAAAA">Connection</FONT></TD><TD BGCOLOR="#000000"><FONT FACE="Courier New" SIZE="2" COLOR="#00FF00">56k Modem (US Robotics)</FONT></TD></TR>
+      </TABLE>
+      <BR>
+      <CENTER><IMG SRC="images/construction.gif" WIDTH="400" HEIGHT="34" ALT="UNDER CONSTRUCTION"></CENTER>
+      </TD></TR></TABLE>
+    </TD></TR>
+    </TABLE>
+  </DIV>
+
+  <!-- ===================== PAGE: LINKS ===================== -->
+  <DIV ID="page-links" STYLE="display: none;">
+    <TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#333399" CELLPADDING="0" CELLSPACING="0" BGCOLOR="#000022">
+    <TR><TD CLASS="hdr">.: MY FAVORITE SITES :.</TD></TR>
+    <TR><TD>
+      <TABLE WIDTH="100%" BORDER="0" CELLPADDING="4" CELLSPACING="0" ID="link-list"></TABLE>
+    </TD></TR>
+    </TABLE>
+    <BR>
+    <TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#333399" CELLPADDING="0" CELLSPACING="0" BGCOLOR="#000022">
+    <TR><TD CLASS="hdr">.: LINK TO ME! :.</TD></TR>
+    <TR><TD ALIGN="center">
+      <BR>
+      <IMG SRC="images/btn_linkme.gif" WIDTH="88" HEIGHT="31" ALT="GEOCITIES RADIO"><BR>
+      <FONT FACE="Verdana, Arial" SIZE="1">Copy this code onto your homepage:</FONT><BR>
+      <TEXTAREA CLASS="field" ROWS="3" COLS="48" READONLY onFocus="this.select()" ID="linkme-code"></TEXTAREA>
+      <BR><BR>
+    </TD></TR>
+    </TABLE>
+  </DIV>
+
+  <!-- ===================== PAGE: GUESTBOOK ===================== -->
+  <DIV ID="page-guestbook" STYLE="display: none;">
+    <TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#333399" CELLPADDING="0" CELLSPACING="0" BGCOLOR="#000022">
+    <TR><TD CLASS="hdr">.: SIGN MY GUESTBOOK :.</TD></TR>
+    <TR><TD ALIGN="center">
+      <FONT FACE="Times New Roman, Times, serif" SIZE="3"><P>Leave your mark on the digital frontier!</P></FONT>
+      <FORM NAME="gbform" onSubmit="return signGuestbook(this);">
+      <TABLE BORDER="0" CELLPADDING="3" CELLSPACING="0">
+      <TR>
+        <TD ALIGN="right"><FONT FACE="Verdana, Arial" SIZE="1"><B>Name:</B></FONT></TD>
+        <TD><INPUT TYPE="text" NAME="gbname" CLASS="field" SIZE="30" MAXLENGTH="40"></TD>
+      </TR>
+      <TR>
+        <TD ALIGN="right"><FONT FACE="Verdana, Arial" SIZE="1"><B>From:</B></FONT></TD>
+        <TD><INPUT TYPE="text" NAME="gbfrom" CLASS="field" SIZE="30" MAXLENGTH="40"></TD>
+      </TR>
+      <TR>
+        <TD ALIGN="right"><FONT FACE="Verdana, Arial" SIZE="1"><B>Found me via:</B></FONT></TD>
+        <TD>
+          <SELECT NAME="gbvia" CLASS="field">
+          <OPTION>Yahoo!</OPTION>
+          <OPTION>AltaVista</OPTION>
+          <OPTION>The Retro Webring</OPTION>
+          <OPTION>A friend told me</OPTION>
+          <OPTION>Just surfing around</OPTION>
+          </SELECT>
+        </TD>
+      </TR>
+      <TR>
+        <TD ALIGN="right" VALIGN="top"><FONT FACE="Verdana, Arial" SIZE="1"><B>Message:</B></FONT></TD>
+        <TD><TEXTAREA NAME="gbmsg" CLASS="field" ROWS="4" COLS="30"></TEXTAREA></TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD><INPUT TYPE="submit" CLASS="oldbtn" VALUE="SIGN IT!"> <INPUT TYPE="reset" CLASS="oldbtn" VALUE="CLEAR"></TD>
+      </TR>
+      </TABLE>
+      </FORM>
+      <FONT FACE="Verdana, Arial" SIZE="1" COLOR="#8888AA">(your entry is saved on this computer)</FONT>
+      <BR><BR>
+    </TD></TR>
+    </TABLE>
+    <BR>
+    <DIV ID="gb-entries"></DIV>
+  </DIV>
+
+  <!-- ===================== PAGE: EMAIL ===================== -->
+  <DIV ID="page-email" STYLE="display: none;">
+    <TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#333399" CELLPADDING="0" CELLSPACING="0" BGCOLOR="#000022">
+    <TR><TD CLASS="hdr">.: EMAIL ME :.</TD></TR>
+    <TR><TD ALIGN="center">
+      <BR>
+      <A HREF="mailto:geosubash@gmail.com?subject=Hi%20from%20your%20homepage!"><IMG SRC="images/email.gif" WIDTH="120" HEIGHT="76" ALT="EMAIL ME!"></A>
+      <BR><BR>
+      <FONT FACE="Courier New, Courier" SIZE="3"><A HREF="mailto:geosubash@gmail.com?subject=Hi%20from%20your%20homepage!">geosubash@gmail.com</A></FONT>
+      <BR><BR>
+      <FONT FACE="Verdana, Arial" SIZE="1" COLOR="#8888AA">Station requests, bug reports and fan mail all welcome.<BR>I read every email! (eventually)</FONT>
+      <BR><BR>
+    </TD></TR>
+    </TABLE>
+  </DIV>
+
+</TD></TR></TABLE>
+</TD>
+
+<!-- ********** RIGHT COLUMN ********** -->
+<TD WIDTH="150" VALIGN="top" BGCOLOR="#000044">
+<TABLE WIDTH="150" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD>
+
+  <!-- hit counter -->
+  <TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#333399" CELLPADDING="0" CELLSPACING="0" BGCOLOR="#000022">
+  <TR><TD CLASS="hdr">.: VISITORS :.</TD></TR>
+  <TR><TD ALIGN="center">
+    <BR>
+    <SPAN ID="hit-counter"></SPAN><BR>
+    <FONT FACE="Courier New, Courier" SIZE="1" COLOR="#00FF00">
+    ONLINE NOW: <FONT COLOR="#FFFF00" ID="stats-online">1</FONT><BR>
+    MAKER: <FONT COLOR="#FFFF00">GEO SUBASH</FONT>
+    </FONT>
+    <BR><BR>
+  </TD></TR>
+  </TABLE>
+
+  <BR>
+
+  <!-- what's new -->
+  <TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#333399" CELLPADDING="0" CELLSPACING="0" BGCOLOR="#000022">
+  <TR><TD CLASS="hdr">.: WHAT'S NEW :.</TD></TR>
+  <TR><TD>
+    <TABLE WIDTH="100%" BORDER="0" CELLPADDING="3" CELLSPACING="0">
+    <TR><TD><FONT FACE="Verdana, Arial" SIZE="1"><IMG SRC="images/new.gif" WIDTH="34" HEIGHT="15" ALT="NEW!" ALIGN="absmiddle"> <FONT COLOR="#00FFFF">09/25/99</FONT><BR>Winamp skin with a real spectrum analyzer!</FONT></TD></TR>
+    <TR><TD><FONT FACE="Verdana, Arial" SIZE="1"><FONT COLOR="#00FFFF">09/12/99</FONT><BR>Added NIGHTWAVE (vaporwave)</FONT></TD></TR>
+    <TR><TD><FONT FACE="Verdana, Arial" SIZE="1"><FONT COLOR="#00FFFF">08/30/99</FONT><BR>Guestbook works now!!</FONT></TD></TR>
+    <TR><TD><FONT FACE="Verdana, Arial" SIZE="1"><FONT COLOR="#00FFFF">08/01/99</FONT><BR>Site is OPEN!</FONT></TD></TR>
+    </TABLE>
+  </TD></TR>
+  </TABLE>
+
+  <BR>
+
+  <!-- webring -->
+  <TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#333399" CELLPADDING="0" CELLSPACING="0" BGCOLOR="#000022">
+  <TR><TD CLASS="hdr">.: WEBRING :.</TD></TR>
+  <TR><TD ALIGN="center">
+    <FONT FACE="Courier New, Courier" SIZE="1" COLOR="#AAAAAA">this site is part of the</FONT><BR>
+    <FONT FACE="Arial Black, Arial" SIZE="2" COLOR="#FF9900"><B>* RETRO WEBRING *</B></FONT><BR>
+    <INPUT TYPE="button" CLASS="oldbtn" VALUE="&lt;&lt;" TITLE="Previous site" onClick="webring(-1)"><INPUT
+           TYPE="button" CLASS="oldbtn" VALUE="?" TITLE="Random site" onClick="webring(0)"><INPUT
+           TYPE="button" CLASS="oldbtn" VALUE="&gt;&gt;" TITLE="Next site" onClick="webring(1)"><BR>
+    <FONT FACE="Verdana, Arial" SIZE="1" COLOR="#8888AA" ID="webring-next">&nbsp;</FONT>
+    <BR>
+  </TD></TR>
+  </TABLE>
+
+  <BR>
+
+  <!-- 88x31 buttons -->
+  <CENTER>
+  <IMG SRC="images/btn_800.gif" WIDTH="88" HEIGHT="31" ALT="Best viewed at 800x600"><BR>
+  <IMG SRC="images/btn_notepad.gif" WIDTH="88" HEIGHT="31" ALT="Hand coded"><BR>
+  <IMG SRC="images/btn_llama.gif" WIDTH="88" HEIGHT="31" ALT="MP3 - llama approved"><BR>
+  <IMG SRC="images/btn_56k.gif" WIDTH="88" HEIGHT="31" ALT="56K modem friendly"><BR>
+  <IMG SRC="images/btn_y2k.gif" WIDTH="88" HEIGHT="31" ALT="Y2K compliant"><BR>
+  <A HREF="#links"><IMG SRC="images/btn_linkme.gif" WIDTH="88" HEIGHT="31" ALT="Link to me!"></A>
+  </CENTER>
+
+</TD></TR></TABLE>
+</TD>
+
+</TR>
+</TABLE>
+</TD></TR>
+
+<!-- ======================= FOOTER ======================= -->
+<TR><TD BGCOLOR="#000022" ALIGN="center">
+  <BR>
+  <FONT FACE="Verdana, Arial" SIZE="1">
+  [ <A HREF="#home">Home</A> | <A HREF="#stations">Stations</A> | <A HREF="#about">About</A> |
+    <A HREF="#links">Links</A> | <A HREF="#guestbook">Guestbook</A> | <A HREF="#email">Email</A> |
+    <A HREF="#top" onClick="window.scrollTo(0, 0); return false;">Top ^</A> ]
+  </FONT>
+  <BR><BR>
+  <FONT FACE="Verdana, Arial" SIZE="1" COLOR="#666699">
+  &copy; 1999 GEOCITIES Radio &amp; <B>Geo Subash</B>. All rights reserved.<BR>
+  Best viewed with Netscape Navigator 4.0 or Internet Explorer 5 at 800x600 resolution.<BR>
+  <SCRIPT LANGUAGE="JavaScript" TYPE="text/javascript">
+  <!--
+  document.write("Last updated: " + document.lastModified);
+  // -->
+  </SCRIPT>
+  </FONT>
+  <BR><BR>
+</TD></TR>
+
+</TABLE>
+</TD></TR>
+</TABLE>
+
+<BR>
+</CENTER>
+
+
+<SCRIPT LANGUAGE="JavaScript" TYPE="text/javascript">
+<!--
+/***********************************************************
+ *  GEO RADIO  -  (c) 1999 Geo Subash
+ *  Winamp-style internet radio tuner.
+ *  Feel free to learn from my code, but please don't steal it!
+ ***********************************************************/
+
+/* ---------------- STATIONS ---------------- */
+var STATIONS = [
+  { freq: "87.5",  name: "NIGHTWAVE",    genre: "VAPORWAVE",   origin: "Virtual",        web: "radio.plaza.one",   src: "https://radio.plaza.one/mp3" },
+  { freq: "88.5",  name: "GROOVE SALAD", genre: "DOWNTEMPO",   origin: "San Francisco",  web: "somafm.com",        src: "https://ice1.somafm.com/groovesalad-128-mp3" },
+  { freq: "89.5",  name: "DRONE ZONE",   genre: "AMBIENT",     origin: "San Francisco",  web: "somafm.com",        src: "https://ice1.somafm.com/dronezone-128-mp3" },
+  { freq: "90.5",  name: "DEF CON",      genre: "INDUSTRIAL",  origin: "San Francisco",  web: "somafm.com",        src: "https://ice1.somafm.com/defcon-128-mp3" },
+  { freq: "91.5",  name: "PARADISE",     genre: "ECLECTIC",    origin: "California",     web: "radioparadise.com", src: "https://stream.radioparadise.com/mp3-128" },
+  { freq: "92.5",  name: "RP MELLOW",    genre: "ACOUSTIC",    origin: "California",     web: "radioparadise.com", src: "https://stream.radioparadise.com/mellow-128" },
+  { freq: "93.5",  name: "RP ROCK",      genre: "CLASSIC",     origin: "California",     web: "radioparadise.com", src: "https://stream.radioparadise.com/rock-128" },
+  { freq: "94.5",  name: "KEXP",         genre: "SEATTLE",     origin: "Seattle, WA",    web: "kexp.org",          src: "https://kexp.streamguys1.com/kexp128.mp3" },
+  { freq: "95.5",  name: "WQXR",         genre: "CLASSICAL",   origin: "New York",       web: "wqxr.org",          src: "https://stream.wqxr.org/wqxr-web" },
+  { freq: "96.5",  name: "HIRSCHMILCH",  genre: "TECHNO",      origin: "Germany",        web: "hirschmilch.de",    src: "https://hirschmilch.de:7000/electronic.mp3" },
+  { freq: "97.5",  name: "PROGRESSIVE",  genre: "TRANCE",      origin: "Germany",        web: "hirschmilch.de",    src: "https://hirschmilch.de:7000/progressive.mp3" },
+  { freq: "98.5",  name: "CHILLHOP",     genre: "LOFI BEATS",  origin: "Germany",        web: "ilovemusic.de",     src: "https://streams.ilovemusic.de/iloveradio17.mp3" },
+  { freq: "99.5",  name: "POPTRON",      genre: "ELECTRO",     origin: "San Francisco",  web: "somafm.com",        src: "https://ice1.somafm.com/poptron-128-mp3" },
+  { freq: "100.5", name: "INDIE POP",    genre: "NEW ROCK",    origin: "San Francisco",  web: "somafm.com",        src: "https://ice1.somafm.com/indiepop-128-mp3" },
+  { freq: "101.5", name: "BBC WORLD",    genre: "GLOBAL NEWS", origin: "London, UK",     web: "bbc.co.uk",         src: "https://stream.live.vc.bbcmedia.co.uk/bbc_world_service" },
+  { freq: "102.5", name: "COVERS",       genre: "REMIXES",     origin: "San Francisco",  web: "somafm.com",        src: "https://ice1.somafm.com/covers-128-mp3" },
+  { freq: "103.5", name: "SECRET AGENT", genre: "SPY THEME",   origin: "San Francisco",  web: "somafm.com",        src: "https://ice1.somafm.com/secretagent-128-mp3" },
+  { freq: "104.5", name: "LUSH",         genre: "VOCALS",      origin: "San Francisco",  web: "somafm.com",        src: "https://ice1.somafm.com/lush-128-mp3" },
+  { freq: "105.5", name: "GOA SUBS",     genre: "WORLD",       origin: "San Francisco",  web: "somafm.com",        src: "https://ice1.somafm.com/suburbsofgoa-128-mp3" },
+  { freq: "106.5", name: "BEAT BLENDER", genre: "DEEP HOUSE",  origin: "San Francisco",  web: "somafm.com",        src: "https://ice1.somafm.com/beatblender-128-mp3" }
+];
+
+var WEBRING_SITES = [
+  { name: "Poolsuite",                  url: "https://poolsuite.net",          desc: "Summer vibes, forever." },
+  { name: "Museum of Endangered Sounds", url: "http://savethesounds.info",     desc: "Dial-up tones, Tamagotchis & more." },
+  { name: "Dialup.net",                 url: "https://dialup.net",             desc: "Remember that screech?" },
+  { name: "Windows 93",                 url: "http://www.windows93.net",       desc: "An operating system from the future past." },
+  { name: "Cameron's World",            url: "https://www.cameronsworld.net",  desc: "A love letter to old homepages." },
+  { name: "Space Jam (1996)",           url: "https://www.spacejam.com/1996",  desc: "Still online. Still perfect." },
+  { name: "ToastyTech",                 url: "http://toastytech.com",          desc: "Old GUIs and web browsers." }
+];
+
+var PAGES = ["home", "stations", "about", "links", "guestbook", "email"];
+
+
+/* ---------------- LITTLE HELPERS ---------------- */
+function $(id) { return document.getElementById(id); }
+
+function setText(id, txt) {
+  var el = $(id);
+  if (el) el.innerHTML = escapeHTML(String(txt));
+}
+
+function escapeHTML(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+                  .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+/* localStorage can be switched off (private mode, old browsers) */
+function loadPref(key, def) {
+  try {
+    var v = window.localStorage.getItem("geo_" + key);
+    return v === null ? def : v;
+  } catch (e) { return def; }
+}
+function savePref(key, val) {
+  try { window.localStorage.setItem("geo_" + key, String(val)); } catch (e) {}
+}
+
+function pad2(n) { return n < 10 ? "0" + n : "" + n; }
+
+
+/* =========================================================
+ *  PAGE SWITCHING - uses #anchors so the Back button works
+ * ========================================================= */
+function goPage(name) {
+  if (window.location.hash !== "#" + name) window.location.hash = name;
+  else showPage(name);
+}
+
+function showPage(name) {
+  var found = false;
+  for (var i = 0; i < PAGES.length; i++) if (PAGES[i] === name) found = true;
+  if (!found) name = "home";
+
+  for (var j = 0; j < PAGES.length; j++) {
+    var p = PAGES[j];
+    $("page-" + p).style.display = (p === name) ? "block" : "none";
+    var nav = $("nav-" + p);
+    if (nav) nav.bgColor = (p === name) ? "#0000CC" : "#000066";
+  }
+}
+
+function onHashChange() {
+  showPage(window.location.hash.replace("#", "") || "home");
+}
+
+
+/* =========================================================
+ *  THE RADIO
+ * ========================================================= */
+var stationIdx = 0;
+var state = "stop";          // stop | connect | play | pause | error
+var volume = 8;              // 0..10
+var tuneId = 0;              // bumps every time we tune, so old events get ignored
+var connectTimer = null;
+
+var audioCtx = null, gainNode = null, analyserL = null, analyserR = null;
+var dataL = null, dataR = null;
+var corsAudio = null;        // routed through Web Audio (real spectrum analyzer)
+var plainAudio = null;       // fallback for stations that block analysis
+var active = null;           // whichever one is playing right now
+
+function makeAudio(useCors) {
+  var a = new Audio();
+  if (useCors) a.crossOrigin = "anonymous";
+  a.preload = "none";
+  a.addEventListener("playing", function () { if (a === active) setState("play"); });
+  a.addEventListener("waiting", function () { if (a === active && state === "play") setState("connect"); });
+  a.addEventListener("pause",   function () { if (a === active && state === "play") setState("pause"); });
+  a.addEventListener("error",   function () { onAudioError(a); });
+  a.addEventListener("ended",   function () { if (a === active && state === "play") tune(); });
+  return a;
+}
+
+function setupAudioGraph() {
+  if (audioCtx || corsAudio === false) return;
+  var Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) { corsAudio = false; return; }
+  try {
+    audioCtx = new Ctx();
+    corsAudio = makeAudio(true);
+    var source = audioCtx.createMediaElementSource(corsAudio);
+    gainNode = audioCtx.createGain();
+    var splitter = audioCtx.createChannelSplitter(2);
+    analyserL = audioCtx.createAnalyser();
+    analyserR = audioCtx.createAnalyser();
+    analyserL.fftSize = analyserR.fftSize = 2048;
+    analyserL.smoothingTimeConstant = analyserR.smoothingTimeConstant = 0.6;
+    source.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    gainNode.connect(splitter);
+    splitter.connect(analyserL, 0);
+    splitter.connect(analyserR, 1);
+    dataL = new Uint8Array(analyserL.frequencyBinCount);
+    dataR = new Uint8Array(analyserR.frequencyBinCount);
+  } catch (e) {
+    audioCtx = null; analyserL = analyserR = null;
+    corsAudio = false;
+  }
+  applyVolume();
+}
+
+function silence(a) {
+  if (!a) return;
+  a.pause();
+  a.removeAttribute("src");
+  try { a.load(); } catch (e) {}
+}
+
+function startAudio(a, url, myId) {
+  active = a;
+  a.src = url;
+  var p = a.play();
+  if (p && p.then) {
+    p.then(null, function (err) {
+      if (myId !== tuneId) return;
+      // NotAllowedError = browser blocked autoplay; wait for a click.
+      if (err && err.name === "NotAllowedError") { setState("stop"); flashStatus("Click PLAY to start the music"); }
+      // AbortError just means we switched stations quickly - ignore it.
+    });
+  }
+}
+
+/* start (or restart) the current station from scratch - it's live radio, so we never resume stale audio */
+function tune() {
+  var myId = ++tuneId;
+  var s = STATIONS[stationIdx];
+  if (!plainAudio) plainAudio = makeAudio(false);
+  setupAudioGraph();
+  if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+
+  // hush whichever player we are NOT about to use (setting a new src resets the other one)
+  var target = corsAudio ? corsAudio : plainAudio;
+  silence(target === plainAudio ? (corsAudio || null) : plainAudio);
+  setState("connect");
+  $("lcd-time").innerHTML = "00:00";
+
+  startAudio(target, s.src, myId);
+
+  clearTimeout(connectTimer);
+  connectTimer = setTimeout(function () {
+    if (myId === tuneId && state === "connect") onAudioError(active);
+  }, 15000);
+  updateStationDisplay();
+}
+
+function onAudioError(a) {
+  if (a !== active || state === "stop" || state === "pause") return;
+  var myId = tuneId;
+  if (a === corsAudio && plainAudio) {
+    // station won't let us analyse its audio (no CORS) - just play it normally
+    silence(corsAudio);
+    startAudio(plainAudio, STATIONS[stationIdx].src, myId);
+    clearTimeout(connectTimer);
+    connectTimer = setTimeout(function () {
+      if (myId === tuneId && state === "connect") onAudioError(plainAudio);
+    }, 15000);
+    return;
+  }
+  silence(a);
+  clearTimeout(connectTimer);
+  setState("error");
+}
+
+function playMusic() {
+  if (state === "pause" || state === "stop" || state === "error") tune();
+}
+
+function pauseMusic() {
+  if (state === "play" || state === "connect") {
+    setState("pause");
+    if (active) active.pause();
+  } else if (state === "pause") {
+    tune();
+  }
+}
+
+function stopMusic() {
+  tuneId++;
+  clearTimeout(connectTimer);
+  setState("stop");
+  silence(corsAudio || null);
+  silence(plainAudio);
+}
+
+function tuneStation(idx) {
+  stationIdx = (idx + STATIONS.length) % STATIONS.length;
+  savePref("station", stationIdx);
+  tune();
+}
+
+function nextStation() { changeStation(1); }
+function prevStation() { changeStation(-1); }
+function changeStation(dir) {
+  stationIdx = (stationIdx + dir + STATIONS.length) % STATIONS.length;
+  savePref("station", stationIdx);
+  if (state === "stop" || state === "error") updateStationDisplay();
+  else tune();
+}
+
+/* ---------- volume ---------- */
+function applyVolume() {
+  var v = volume / 10;
+  if (gainNode) gainNode.gain.value = v * v;      // ears hear loudness on a curve
+  if (corsAudio) corsAudio.volume = 1;
+  if (plainAudio) plainAudio.volume = v * v;
+}
+
+function setVolume(v) {
+  volume = Math.max(0, Math.min(10, v));
+  savePref("volume", volume);
+  applyVolume();
+  drawVolume();
+}
+function adjustVolume(d) { setVolume(volume + d); }
+
+function buildVolumeBar() {
+  var row = $("vol-bar");
+  for (var i = 1; i <= 10; i++) {
+    var td = row.insertCell(-1);
+    td.className = "volcell";
+    td.width = 5;
+    td.height = 12;
+    td.title = "Volume " + (i * 10) + "%";
+    td.onclick = (function (n) { return function () { setVolume(n); }; })(i);
+    td.innerHTML = "&nbsp;";
+  }
+  drawVolume();
+}
+
+function drawVolume() {
+  var cells = $("vol-bar").cells;
+  for (var i = 0; i < cells.length; i++) {
+    var on = i < volume;
+    var c = i < 6 ? "#00DD00" : (i < 8 ? "#DDDD00" : "#FF3300");
+    // "important" so the volume blocks still light up in matrix mode
+    cells[i].style.setProperty("background-color", on ? c : "#1A1A1A", "important");
+  }
+}
+
+/* ---------- display ---------- */
+var tickerText = "";
+var tickerPos = 0;
+
+function setState(s) {
+  state = s;
+  if (s !== "connect") clearTimeout(connectTimer);
+  var labels = { stop: "STOP", connect: "TUNING", play: "&gt; PLAY", pause: "|| PAUSE", error: "ERROR" };
+  $("lcd-state").innerHTML = labels[s];
+  $("lcd-stereo").color = (s === "play") ? "#00FF00" : "#004400";
+  if (s === "stop") $("lcd-time").innerHTML = "00:00";
+  updateTicker();
+  updateStationList();
+  updateMediaSession();
+  if (s === "play" && active === plainAudio && audioCtx) {
+    flashStatus("This station hides its audio from visualizers - showing a simulation");
+  }
+}
+
+function updateTicker() {
+  var s = STATIONS[stationIdx];
+  var t = s.freq + " FM - " + s.name + " (" + s.genre + ")";
+  if (state === "connect") t = "CONNECTING TO " + s.name + "...";
+  else if (state === "error") t = "NO SIGNAL ON " + s.freq + " FM - TRY ANOTHER STATION";
+  else if (state === "stop") t = s.freq + " FM - " + s.name + " - PRESS PLAY";
+  if (t !== tickerText) {
+    tickerText = t;
+    tickerPos = 0;
+  }
+}
+
+function tickTicker() {
+  var WIDTH = 34;
+  var shown;
+  if (tickerText.length <= WIDTH) {
+    shown = tickerText;
+  } else {
+    var loop = tickerText + "  ***  ";
+    var doubled = loop + loop;
+    shown = doubled.substr(tickerPos % loop.length, WIDTH);
+    tickerPos++;
+  }
+  $("lcd-ticker").innerHTML = escapeHTML(shown);
+}
+
+function tickClock() {
+  var el = $("lcd-time");
+  if (state === "play" && active) {
+    var t = Math.floor(active.currentTime || 0);
+    var m = Math.floor(t / 60);
+    el.innerHTML = (m > 99 ? pad2(m % 100) : pad2(m)) + ":" + pad2(t % 60);
+    el.style.visibility = "visible";
+  } else if (state === "pause" || state === "connect") {
+    // blinks, just like the real thing
+    el.style.visibility = (el.style.visibility === "hidden") ? "visible" : "hidden";
+  } else {
+    el.style.visibility = "visible";
+  }
+}
+
+var statusTimer = null;
+function flashStatus(msg) {
+  var el = $("wa-status");
+  el.innerHTML = escapeHTML(msg);
+  el.color = "#FFFF00";
+  clearTimeout(statusTimer);
+  statusTimer = setTimeout(function () {
+    el.innerHTML = "Keys: Z=prev X=play C=pause V=stop B=next +/- volume";
+    el.color = "#8888AA";
+  }, 6000);
+}
+
+function updateStationDisplay() {
+  var s = STATIONS[stationIdx];
+  setText("info-name", s.name);
+  setText("info-genre", s.genre);
+  setText("info-origin", s.origin);
+  setText("info-web", s.web);
+  $("info-web").href = "https://" + s.web;
+  setText("lcd-freq", s.freq);
+  updateTicker();
+  tickTicker();
+  updateStationList();
+  updateMediaSession();
+}
+
+function buildStationList() {
+  var body = $("station-list");
+  for (var i = 0; i < STATIONS.length; i++) {
+    var s = STATIONS[i];
+    var row = body.insertRow(-1);
+    row.style.cursor = "pointer";
+    row.title = "Tune in to " + s.name;
+    row.onclick = (function (n) { return function () { tuneStation(n); goPage("home"); }; })(i);
+    row.onmouseover = function () { if (!this.isCurrent) this.bgColor = "#222255"; };
+    row.onmouseout  = function () { if (!this.isCurrent) this.bgColor = ""; };
+    row.innerHTML =
+      '<TD ALIGN="center">&nbsp;</TD>' +
+      '<TD><FONT FACE="Courier New, Courier" SIZE="2" COLOR="#FFFF00">' + escapeHTML(s.freq) + '</FONT></TD>' +
+      '<TD><FONT FACE="Arial" SIZE="2" COLOR="#FFFFFF"><B>' + escapeHTML(s.name) + '</B></FONT></TD>' +
+      '<TD><FONT FACE="Arial" SIZE="1" COLOR="#AAAAAA">' + escapeHTML(s.genre) + '</FONT></TD>' +
+      '<TD ALIGN="center"><INPUT TYPE="button" CLASS="oldbtn" VALUE="TUNE IN"></TD>';
+  }
+}
+
+function updateStationList() {
+  var rows = $("station-list").rows;
+  for (var i = 0; i < rows.length; i++) {
+    var cur = (i === stationIdx);
+    rows[i].isCurrent = cur;
+    rows[i].bgColor = cur ? "#000099" : "";
+    var playing = cur && (state === "play" || state === "connect");
+    rows[i].cells[0].innerHTML = playing ? '<IMG SRC="images/bullet.gif" WIDTH="12" HEIGHT="12" ALT="&gt;">' : "&nbsp;";
+  }
+}
+
+/* ---------- winamp window buttons ---------- */
+function toggleShade() {
+  var b = $("winamp-body");
+  b.style.display = (b.style.display === "none") ? "block" : "none";
+}
+function closePlayer() {
+  stopMusic();
+  $("winamp").style.display = "none";
+  $("player-closed").style.display = "";
+}
+function openPlayer() {
+  $("winamp").style.display = "";
+  $("player-closed").style.display = "none";
+  $("winamp-body").style.display = "block";
+}
+
+/* ---------- phone lock screen / media keys ---------- */
+function updateMediaSession() {
+  if (!("mediaSession" in navigator) || !window.MediaMetadata) return;
+  var s = STATIONS[stationIdx];
+  try {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: s.name + " - " + s.freq + " FM",
+      artist: s.genre,
+      album: "GEO RADIO",
+      artwork: [{ src: "images/icon-512.png", sizes: "512x512", type: "image/png" }]
+    });
+    navigator.mediaSession.playbackState = (state === "play" || state === "connect") ? "playing" : (state === "pause" ? "paused" : "none");
+  } catch (e) {}
+}
+function setupMediaSession() {
+  if (!("mediaSession" in navigator)) return;
+  var ms = navigator.mediaSession;
+  var h = { play: playMusic, pause: pauseMusic, stop: stopMusic, previoustrack: prevStation, nexttrack: nextStation };
+  for (var k in h) {
+    try { ms.setActionHandler(k, h[k]); } catch (e) {}
+  }
+}
+
+
+/* =========================================================
+ *  SPECTRUM ANALYZER  (Winamp style, stereo split)
+ * ========================================================= */
+var vis = null, visCtx = null;
+var VIS_BARS = 16;
+var levL = [], levR = [], peakL = [], peakR = [], peakVL = [], peakVR = [];
+
+function setupVis() {
+  vis = $("vis");
+  if (!vis || !vis.getContext) return;
+  visCtx = vis.getContext("2d");
+  for (var i = 0; i < VIS_BARS; i++) {
+    levL[i] = levR[i] = peakL[i] = peakR[i] = peakVL[i] = peakVR[i] = 0;
+  }
+  var raf = window.requestAnimationFrame || function (f) { return setTimeout(f, 33); };
+  var loop = function () { drawVis(); raf(loop); };
+  loop();
+}
+
+/* how loud is the band between two frequencies? (0..1) */
+function bandLevel(data, lo, hi) {
+  var hz = audioCtx.sampleRate / analyserL.fftSize;
+  var a = Math.floor(lo / hz), b = Math.max(a + 1, Math.floor(hi / hz));
+  var m = 0;
+  for (var i = a; i < b && i < data.length; i++) if (data[i] > m) m = data[i];
+  return m / 255;
+}
+
+function drawVis() {
+  var W = vis.width, H = vis.height;
+  var g = visCtx;
+  var matrix = document.body.className.indexOf("matrix") >= 0;
+  var live = (state === "play");
+  var real = live && active === corsAudio && analyserL;
+
+  if (real) {
+    analyserL.getByteFrequencyData(dataL);
+    analyserR.getByteFrequencyData(dataR);
+  }
+
+  var LO = Math.log(40), HI = Math.log(16000);
+  var t = new Date().getTime() / 1000;
+  for (var i = 0; i < VIS_BARS; i++) {
+    var tl = 0, tr = 0;
+    if (real) {
+      var f1 = Math.exp(LO + (HI - LO) * i / VIS_BARS);
+      var f2 = Math.exp(LO + (HI - LO) * (i + 1) / VIS_BARS);
+      tl = bandLevel(dataL, f1, f2);
+      tr = bandLevel(dataR, f1, f2);
+    } else if (live) {
+      // station blocks analysis: a believable fake, heavier in the bass
+      var base = 0.75 - i * 0.03;
+      tl = base * (0.55 + 0.45 * Math.abs(Math.sin(t * (2.1 + i * 0.37) + i)));
+      tr = base * (0.55 + 0.45 * Math.abs(Math.sin(t * (1.9 + i * 0.41) + i * 1.7)));
+      tl *= 0.7 + Math.random() * 0.3;
+      tr *= 0.7 + Math.random() * 0.3;
+    }
+    // bars shoot up instantly and fall slowly
+    levL[i] = tl > levL[i] ? tl : Math.max(tl, levL[i] - 0.045);
+    levR[i] = tr > levR[i] ? tr : Math.max(tr, levR[i] - 0.045);
+    // peak caps hang in the air, then drop
+    if (levL[i] >= peakL[i]) { peakL[i] = levL[i]; peakVL[i] = 0; } else { peakVL[i] += 0.0035; peakL[i] = Math.max(0, peakL[i] - peakVL[i]); }
+    if (levR[i] >= peakR[i]) { peakR[i] = levR[i]; peakVR[i] = 0; } else { peakVR[i] += 0.0035; peakR[i] = Math.max(0, peakR[i] - peakVR[i]); }
+  }
+
+  g.fillStyle = "#000000";
+  g.fillRect(0, 0, W, H);
+
+  // dotted background grid
+  g.fillStyle = matrix ? "#002200" : "#1A1A2A";
+  for (var y = 1; y < H; y += 2) for (var x = 0; x < W; x += 2) g.fillRect(x, y, 1, 1);
+
+  var GAP = 4;
+  var side = Math.floor((W - GAP) / 2);
+  var bw = Math.floor(side / VIS_BARS);
+  var used = bw * VIS_BARS;
+  var leftStart = side - used;               // left channel: bass in the middle
+  var rightStart = side + GAP;               // right channel: bass in the middle
+
+  for (var b = 0; b < VIS_BARS; b++) {
+    drawBar(g, leftStart + (VIS_BARS - 1 - b) * bw, bw - 1, H, levL[b], peakL[b], matrix);
+    drawBar(g, rightStart + b * bw, bw - 1, H, levR[b], peakR[b], matrix);
+  }
+
+  // center divider
+  g.fillStyle = matrix ? "#004400" : "#333344";
+  g.fillRect(side + 1, 0, GAP - 2, H);
+}
+
+function drawBar(g, x, w, H, lev, peak, matrix) {
+  var h = Math.round(lev * (H - 1));
+  for (var r = 0; r < h; r += 2) {
+    var f = r / H;
+    g.fillStyle = matrix ? "#00FF00" : (f > 0.8 ? "#FF3000" : (f > 0.55 ? "#FFCC00" : (f > 0.3 ? "#9CFF00" : "#18C000")));
+    g.fillRect(x, H - 1 - r, w, 1);
+  }
+  var p = Math.round(peak * (H - 1));
+  if (p > 1) {
+    g.fillStyle = matrix ? "#AAFFAA" : "#D6D6E6";
+    g.fillRect(x, H - 1 - p, w, 1);
+  }
+}
+
+
+/* =========================================================
+ *  HIT COUNTER + FAKE "ONLINE NOW"
+ * ========================================================= */
+function drawCounter() {
+  var visits = parseInt(loadPref("visitors", "1337"), 10);
+  if (isNaN(visits)) visits = 1337;
+  var counted = false;
+  try { counted = window.sessionStorage.getItem("geo_counted") === "1"; } catch (e) {}
+  if (!counted) {
+    visits++;
+    savePref("visitors", visits);
+    try { window.sessionStorage.setItem("geo_counted", "1"); } catch (e) {}
+  }
+  var digits = String(visits);
+  while (digits.length < 6) digits = "0" + digits;
+  var html = "";
+  for (var i = 0; i < digits.length; i++) {
+    html += '<IMG SRC="images/counter/' + digits.charAt(i) + '.gif" WIDTH="15" HEIGHT="22" ALT="' + digits.charAt(i) + '">';
+  }
+  $("hit-counter").innerHTML = html;
+}
+
+var online = 3;
+function tickOnline() {
+  online += Math.floor(Math.random() * 3) - 1;
+  if (online < 1) online = 1;
+  if (online > 42) online = 42;
+  $("stats-online").innerHTML = online;
+}
+
+
+/* =========================================================
+ *  VIRTUAL DINO
+ * ========================================================= */
+var dinoFood = 5, dinoLove = 5;
+
+function meter(n) {
+  var s = "[";
+  for (var i = 0; i < 5; i++) s += (i < n) ? "#" : ".";
+  return s + "]";
+}
+
+function drawDino() {
+  $("dino-food").innerHTML = meter(dinoFood);
+  $("dino-love").innerHTML = meter(dinoLove);
+}
+
+function petDino(what) {
+  var msg;
+  if (what === "feed") {
+    if (dinoFood >= 5) msg = "*burp* I'm stuffed!";
+    else { dinoFood++; msg = "*CHOMP CHOMP* Yum, ferns!"; }
+  } else {
+    if (dinoLove >= 5) msg = "Byte loves you THIS much!";
+    else { dinoLove++; msg = "*happy dino noises*"; }
+  }
+  $("dino-msg").innerHTML = msg;
+  savePref("dino", dinoFood + "," + dinoLove);
+  drawDino();
+}
+
+function tickDino() {
+  if (Math.random() < 0.5) dinoFood = Math.max(0, dinoFood - 1);
+  else dinoLove = Math.max(0, dinoLove - 1);
+  if (dinoFood === 0) $("dino-msg").innerHTML = "Byte is HUNGRY!!";
+  else if (dinoLove === 0) $("dino-msg").innerHTML = "Byte feels lonely...";
+  savePref("dino", dinoFood + "," + dinoLove);
+  drawDino();
+}
+
+function setupDino() {
+  var saved = String(loadPref("dino", "5,5")).split(",");
+  dinoFood = Math.max(0, Math.min(5, parseInt(saved[0], 10) || 0));
+  dinoLove = Math.max(0, Math.min(5, parseInt(saved[1], 10) || 0));
+  drawDino();
+}
+
+
+/* =========================================================
+ *  GUESTBOOK  (saved in this browser)
+ * ========================================================= */
+var GB_SEED = [
+  { name: "WebMaster Jeff", from: "Ohio", via: "The Retro Webring", date: "10/02/1999", msg: "Kewl site dude!! The Winamp thing is awesome. Check out my page too." },
+  { name: "xX_StarGazer_Xx", from: "the Internet", via: "AltaVista", date: "09/28/1999", msg: "Drone Zone is my fave for doing homework. <3 <3" },
+  { name: "Grandma Rose", from: "Florida", via: "A friend told me", date: "09/20/1999", msg: "My grandson showed me this. How do I make the music louder?" }
+];
+
+function loadGuestbook() {
+  try {
+    var raw = window.localStorage.getItem("geo_guestbook");
+    var list = raw ? JSON.parse(raw) : [];
+    return (list && list.length !== undefined) ? list : [];
+  } catch (e) { return []; }
+}
+
+function drawGuestbook() {
+  var list = loadGuestbook().concat(GB_SEED);
+  var html = '<TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#333399" CELLPADDING="0" CELLSPACING="0" BGCOLOR="#000022">' +
+             '<TR><TD CLASS="hdr">.: ' + list.length + ' PEOPLE HAVE SIGNED :.</TD></TR><TR><TD>';
+  for (var i = 0; i < list.length; i++) {
+    var e = list[i];
+    html += '<TABLE WIDTH="100%" BORDER="0" CELLPADDING="4" CELLSPACING="0" STYLE="border-bottom: 1px dashed #333366;">' +
+            '<TR><TD BGCOLOR="#000044"><FONT FACE="Verdana, Arial" SIZE="1">' +
+            '<IMG SRC="images/bullet.gif" WIDTH="12" HEIGHT="12" ALT="*" ALIGN="absmiddle"> ' +
+            '<FONT COLOR="#FFFF00"><B>' + escapeHTML(e.name) + '</B></FONT>' +
+            (e.from ? ' from <FONT COLOR="#00FFFF">' + escapeHTML(e.from) + '</FONT>' : '') +
+            '</FONT></TD>' +
+            '<TD BGCOLOR="#000044" ALIGN="right"><FONT FACE="Courier New, Courier" SIZE="1" COLOR="#8888AA">' + escapeHTML(e.date) + '</FONT></TD></TR>' +
+            '<TR><TD COLSPAN="2"><FONT FACE="Times New Roman, Times, serif" SIZE="2">' + escapeHTML(e.msg).replace(/\n/g, "<BR>") + '</FONT><BR>' +
+            '<FONT FACE="Verdana, Arial" SIZE="1" COLOR="#666699">found me via: ' + escapeHTML(e.via) + '</FONT></TD></TR></TABLE>';
+  }
+  html += '</TD></TR></TABLE>';
+  $("gb-entries").innerHTML = html;
+}
+
+function signGuestbook(f) {
+  var name = f.gbname.value.replace(/^\s+|\s+$/g, "");
+  var msg = f.gbmsg.value.replace(/^\s+|\s+$/g, "");
+  if (!name) { alert("Please type in your name!"); f.gbname.focus(); return false; }
+  if (!msg)  { alert("You forgot to write a message!"); f.gbmsg.focus(); return false; }
+  var d = new Date();
+  var entry = {
+    name: name.substr(0, 40),
+    from: f.gbfrom.value.replace(/^\s+|\s+$/g, "").substr(0, 40),
+    via: f.gbvia.options[f.gbvia.selectedIndex].text,
+    date: pad2(d.getMonth() + 1) + "/" + pad2(d.getDate()) + "/" + d.getFullYear(),
+    msg: msg.substr(0, 500)
+  };
+  var list = loadGuestbook();
+  list.unshift(entry);
+  if (list.length > 50) list.length = 50;
+  try {
+    window.localStorage.setItem("geo_guestbook", JSON.stringify(list));
+    alert("Thanks for signing my guestbook, " + entry.name + "!!");
+  } catch (e) {
+    alert("Sorry, your browser won't let me save the guestbook :(");
+  }
+  f.reset();
+  drawGuestbook();
+  return false;
+}
+
+
+/* =========================================================
+ *  WEBRING + LINKS PAGE
+ * ========================================================= */
+var webringIdx = 0;
+
+function webring(dir) {
+  if (dir === 0) webringIdx = Math.floor(Math.random() * WEBRING_SITES.length);
+  else webringIdx = (webringIdx + dir + WEBRING_SITES.length) % WEBRING_SITES.length;
+  var site = WEBRING_SITES[webringIdx];
+  $("webring-next").innerHTML = "&rarr; " + escapeHTML(site.name);
+  window.open(site.url, "_blank");
+}
+
+function buildLinks() {
+  var t = $("link-list");
+  for (var i = 0; i < WEBRING_SITES.length; i++) {
+    var s = WEBRING_SITES[i];
+    var row = t.insertRow(-1);
+    row.innerHTML =
+      '<TD WIDTH="14" VALIGN="top"><IMG SRC="images/bullet.gif" WIDTH="12" HEIGHT="12" ALT="*"></TD>' +
+      '<TD><FONT FACE="Verdana, Arial" SIZE="2"><A HREF="' + escapeHTML(s.url) + '" TARGET="_blank"><B>' + escapeHTML(s.name) + '</B></A></FONT>' +
+      (i < 2 ? ' <IMG SRC="images/new.gif" WIDTH="34" HEIGHT="15" ALT="NEW!" ALIGN="absmiddle">' : '') +
+      '<BR><FONT FACE="Verdana, Arial" SIZE="1" COLOR="#AAAAAA">' + escapeHTML(s.desc) + '</FONT></TD>';
+  }
+  var here = window.location.href.split("#")[0];
+  var base = here.substring(0, here.lastIndexOf("/") + 1);
+  $("linkme-code").value = '<A HREF="' + here + '"><IMG SRC="' + base + 'images/btn_linkme.gif" WIDTH="88" HEIGHT="31" BORDER="0" ALT="GEOCITIES RADIO"></A>';
+}
+
+
+/* =========================================================
+ *  POP-UP PLAYER / INSTALL AS APP
+ * ========================================================= */
+var installPrompt = null;
+var IS_MOBILE = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+window.addEventListener("beforeinstallprompt", function (e) {
+  e.preventDefault();
+  installPrompt = e;
+  var el = $("launch-text");
+  if (el) el.innerHTML = "INSTALL APP";
+});
+
+function setupLauncher() {
+  var standalone = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone;
+  if (standalone || window.name === "GeoRadioPopup") {
+    $("launch-row").style.display = "none";
+    return;
+  }
+  if (IS_MOBILE) $("launch-text").innerHTML = "INSTALL APP";
+}
+
+function launchStandalone() {
+  if (installPrompt) {
+    installPrompt.prompt();
+    installPrompt = null;
+    return;
+  }
+  if (IS_MOBILE) {
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      alert("TO INSTALL ON iPHONE / iPAD:\n\n1. Tap the Share button (square with an arrow)\n2. Tap 'Add to Home Screen'\n3. Open GEO RADIO from your home screen!");
+    } else {
+      alert("TO INSTALL ON ANDROID:\n\n1. Tap the browser menu (three dots)\n2. Tap 'Install app' or 'Add to Home screen'");
+    }
+    return;
+  }
+  // desktop: an 800x600 pop-up, the proper size for this site
+  stopMusic();
+  var w = 800, h = 600;
+  var left = Math.max(0, Math.round((screen.width - w) / 2));
+  var top = Math.max(0, Math.round((screen.height - h) / 2));
+  var win = window.open(window.location.href.split("#")[0], "GeoRadioPopup",
+    "width=" + w + ",height=" + h + ",left=" + left + ",top=" + top +
+    ",resizable=yes,scrollbars=yes,status=no,toolbar=no,menubar=no,location=no");
+  if (!win) alert("Your pop-up blocker stopped the player window!\nPlease allow pop-ups for this site.");
+}
+
+
+/* =========================================================
+ *  KEYBOARD: Winamp keys + a secret
+ * ========================================================= */
+var KONAMI = ["arrowup", "arrowup", "arrowdown", "arrowdown", "arrowleft", "arrowright", "arrowleft", "arrowright", "b", "a"];
+var konamiPos = 0;
+
+function onKey(e) {
+  e = e || window.event;
+  // don't steal keys while somebody is typing in the guestbook
+  var t = e.target || e.srcElement || {};
+  var tag = String(t.tagName || "").toUpperCase();
+  if (tag === "TEXTAREA" || tag === "SELECT") return;
+  if (tag === "INPUT" && !/^(button|submit|reset|checkbox|radio)$/i.test(t.type)) return;
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  var k = String(e.key || "").toLowerCase();
+
+  // secret code - the last two keys (b, a) shouldn't also skip stations
+  if (k === KONAMI[konamiPos]) {
+    konamiPos++;
+    if (konamiPos === KONAMI.length) { konamiPos = 0; toggleMatrix(); return; }
+    if (konamiPos > 8) return;
+  } else {
+    konamiPos = (k === KONAMI[0]) ? 1 : 0;
+  }
+
+  switch (k) {
+    case "z": prevStation(); break;
+    case "x": playMusic(); break;
+    case "c": pauseMusic(); break;
+    case "v": stopMusic(); break;
+    case "b": nextStation(); break;
+    case "+": case "=": adjustVolume(1); break;
+    case "-": case "_": adjustVolume(-1); break;
+  }
+}
+
+function toggleMatrix() {
+  var b = document.body;
+  if (b.className.indexOf("matrix") >= 0) {
+    b.className = "";
+    alert("*** EXITING THE MATRIX ***");
+  } else {
+    b.className = "matrix";
+    alert("*** ACCESS GRANTED: WELCOME TO THE MATRIX ***");
+  }
+}
+
+
+/* =========================================================
+ *  SCROLLING TITLE BAR
+ * ========================================================= */
+var titleText = " ~*~ GEOCITIES ~*~ The Neighborhood for Retro Souls ~*~ CREATED BY GEO SUBASH ~*~ ";
+function scrollTitle() {
+  titleText = titleText.substring(1) + titleText.substring(0, 1);
+  document.title = titleText;
+}
+
+
+/* =========================================================
+ *  START HERE
+ * ========================================================= */
+function init() {
+  stationIdx = parseInt(loadPref("station", "0"), 10) || 0;
+  if (stationIdx < 0 || stationIdx >= STATIONS.length) stationIdx = 0;
+  volume = parseInt(loadPref("volume", "8"), 10);
+  if (isNaN(volume)) volume = 8;
+
+  buildStationList();
+  buildVolumeBar();
+  buildLinks();
+  drawGuestbook();
+  drawCounter();
+  setupDino();
+  setupLauncher();
+  setupMediaSession();
+  setupVis();
+  updateStationDisplay();
+  setState("stop");
+
+  onHashChange();
+  window.onhashchange = onHashChange;
+  document.onkeydown = onKey;
+
+  setInterval(tickTicker, 180);
+  setInterval(tickClock, 500);
+  setInterval(tickOnline, 5000);
+  setInterval(tickDino, 90000);
+  setInterval(scrollTitle, 250);
+
+  if ("serviceWorker" in navigator && /^https?:$/.test(window.location.protocol)) {
+    navigator.serviceWorker.register("sw.js").then(null, function () {});
+  }
+}
+// -->
+</SCRIPT>
+
+</BODY>
+</HTML>
