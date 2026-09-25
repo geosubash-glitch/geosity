@@ -544,7 +544,7 @@ Please upgrade to Netscape Navigator 4.0 or Internet Explorer 5!</B></FONT>
     <TR><TD ALIGN="center">
       <FONT FACE="Times New Roman, Times, serif" SIZE="3" COLOR="#FFCCDD"><P><I>The loveliest ladies of the World Wide Web!</I></P></FONT>
       <TABLE BORDER="0" CELLPADDING="5" CELLSPACING="0" ID="pinup-grid"></TABLE>
-      <FONT FACE="Verdana, Arial" SIZE="1" COLOR="#AA7799">All original pixel art drawn for GEO RADIO. Shuffled every visit!</FONT>
+      <FONT FACE="Verdana, Arial" SIZE="1" COLOR="#AA7799">All original art drawn for GEO RADIO. Click a pin-up for full size. Shuffled every visit!</FONT>
       <BR><BR>
     </TD></TR>
     </TABLE>
@@ -609,7 +609,7 @@ Please upgrade to Netscape Navigator 4.0 or Internet Explorer 5!</B></FONT>
   <TR><TD CLASS="hdr" STYLE="background-color: #990044;">.: PIN-UP OF THE DAY :.</TD></TR>
   <TR><TD ALIGN="center">
     <BR>
-    <A HREF="#pinups"><IMG ID="potd-img" SRC="images/pinups/betty-byte.gif" WIDTH="96" HEIGHT="168" ALT="Pin-up of the day"></A><BR>
+    <A HREF="#pinups"><IMG ID="potd-img" SRC="images/pinups/betty-byte.gif" WIDTH="120" HEIGHT="210" ALT="Pin-up of the day"></A><BR>
     <FONT FACE="Verdana, Arial" SIZE="1" COLOR="#FF99CC"><B ID="potd-name">Betty Byte</B></FONT><BR>
     <FONT FACE="Verdana, Arial" SIZE="1"><A HREF="#pinups">See them all &gt;&gt;</A></FONT>
     <BR><BR>
@@ -1605,12 +1605,13 @@ function drawPinups() {
   while (t.rows.length) t.deleteRow(0);
   var row = null;
   for (var i = 0; i < list.length; i++) {
-    if (i % 4 === 0) row = t.insertRow(-1);
+    if (i % 3 === 0) row = t.insertRow(-1);
     var cell = row.insertCell(-1);
     cell.align = "center";
     cell.vAlign = "top";
-    cell.innerHTML = '<IMG SRC="images/pinups/' + list[i].file + '.gif" WIDTH="96" HEIGHT="168" ALT="' + escapeHTML(list[i].name) +
-                     '" STYLE="border: 3px ridge #FF66AA;"><BR><FONT FACE="Verdana, Arial" SIZE="1" COLOR="#FF99CC"><B>' +
+    cell.innerHTML = '<A HREF="images/pinups/' + list[i].file + '.gif" TARGET="_blank" TITLE="Click for full size!">' +
+                     '<IMG SRC="images/pinups/' + list[i].file + '.gif" WIDTH="132" HEIGHT="231" ALT="' + escapeHTML(list[i].name) +
+                     '" STYLE="border: 3px ridge #FF66AA;"></A><BR><FONT FACE="Verdana, Arial" SIZE="1" COLOR="#FF99CC"><B>' +
                      escapeHTML(list[i].name) + '</B></FONT>';
   }
 }

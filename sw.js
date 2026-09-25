@@ -1,7 +1,7 @@
 /* GEO RADIO - offline helper
  * Keeps the page + pictures on your computer so the site loads even on a bad modem day.
  * Radio streams are NEVER touched here - they always come straight from the station. */
-var CACHE_NAME = "geo-radio-v4";
+var CACHE_NAME = "geo-radio-v5";
 var ASSETS = [
   "./",
   "./index.html",
