@@ -1,7 +1,7 @@
 /* GEO RADIO - offline helper
  * Keeps the page + pictures on your computer so the site loads even on a bad modem day.
  * Radio streams are NEVER touched here - they always come straight from the station. */
-var CACHE_NAME = "geo-radio-v5";
+var CACHE_NAME = "geo-radio-v6";
 var ASSETS = [
   "./",
   "./index.html",
@@ -28,18 +28,8 @@ var ASSETS = [
   "./images/counter/0.gif", "./images/counter/1.gif", "./images/counter/2.gif", "./images/counter/3.gif",
   "./images/counter/4.gif", "./images/counter/5.gif", "./images/counter/6.gif", "./images/counter/7.gif",
   "./images/counter/8.gif", "./images/counter/9.gif",
-  "./images/pinups/betty-byte.gif",
-  "./images/pinups/dotty-dialup.gif",
-  "./images/pinups/marilyn-modem.gif",
-  "./images/pinups/rita-rom.gif",
-  "./images/pinups/gigi-gigabyte.gif",
-  "./images/pinups/lola-lan.gif",
-  "./images/pinups/sandy-scroll.gif",
-  "./images/pinups/vera-vga.gif",
-  "./images/pinups/pixel-peggy.gif",
-  "./images/pinups/cookie-cache.gif",
-  "./images/pinups/stella-static.gif",
-  "./images/pinups/june-jpeg.gif"
+  "./images/pinups/denim-dream.jpg",
+  "./images/pinups/sapphire-silk.gif"
 ];
 
 self.addEventListener("install", function (e) {
