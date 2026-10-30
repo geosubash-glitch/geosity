@@ -63,7 +63,7 @@ BLUR_RATIO = 0.25
 GAP = 12                          # px between tiles and around the edge
 BACKGROUND = (14, 14, 16)         # near-black, like a dark Pinterest feed
 CORNER_RADIUS = 14
-COLUMN_WIDTH = {2: 720, 3: 600}   # px; 2 cols -> 1476px wide, 3 cols -> 1848px wide
+COLUMN_WIDTH = {1: 900, 2: 720, 3: 600}   # px; 2 cols -> 1476px wide, 3 cols -> 1848px wide
 # Tile shapes (width / height). Each tile takes one that still holds the
 # whole subject, rotating through them so neighbouring tiles differ in height.
 TILE_ASPECTS = (0.45, 0.5, 0.5625, 0.6667, 0.75, 0.8)
@@ -549,37 +549,58 @@ def tile_aspect(hero: dict, order: int) -> float:
 
 
 def plan_layout(heroes: list[dict], columns: int) -> list[list[dict]]:
-    """Greedy masonry: each tile drops into the currently shortest column, then
-    the last tile of each column is reshaped so the columns end nearly level."""
+    """Masonry plan. Each tile has a natural height (from its rotated shape) and a
+    range it can stretch or shrink to while still holding the whole subject.
+    Every way of dealing tiles into columns is tried (at most 3^7 for 8 tiles);
+    the winner lets all columns end at the same height, keeps the best-ranked
+    shots near the top, and reshapes tiles the least."""
+    import itertools
+
     col_w = COLUMN_WIDTH[columns]
-    cols: list[list[dict]] = [[] for _ in range(columns)]
-
-    def height(col):
-        return sum(t["h"] + GAP for t in col)
-
+    tiles = []
     for order, hero in enumerate(heroes):
-        aspect = tile_aspect(hero, order)
-        tile = {"hero": hero, "aspect": aspect, "h": round(col_w / aspect)}
-        min(cols, key=height).append(tile)
+        lo, hi = aspect_range(hero)
+        h_min, h_max = col_w / min(hi, 1.25), col_w / max(lo, 0.4)
+        h = min(max(round(col_w / tile_aspect(hero, order)), h_min), h_max)
+        tiles.append({"hero": hero, "h": h, "h_min": h_min, "h_max": h_max})
 
-    filled = [c for c in cols if c]
-    if len(filled) > 1:
-        # Even out the bottoms: spread each column's shortfall or overshoot
-        # over its tiles (last first), keeping every crop around the subject.
-        target = sum(height(c) for c in filled) / len(filled)
-        for col in filled:
-            delta = target - height(col)
-            for tile in reversed(col):
-                if abs(delta) < 1:
-                    break
-                lo, hi = aspect_range(tile["hero"])
-                lo, hi = max(lo, 0.4), min(hi, 1.25)
-                h_min, h_max = col_w / hi, col_w / lo
-                new_h = min(max(tile["h"] + delta, h_min), h_max)
-                delta -= new_h - tile["h"]
-                tile["h"] = round(new_h)
-                tile["aspect"] = col_w / tile["h"]
-    return cols
+    n = len(tiles)
+    best = None
+    # The best shot always starts the first column; columns are otherwise interchangeable.
+    for rest in itertools.product(range(columns), repeat=n - 1):
+        assign = (0, *rest)
+        cols = [[i for i in range(n) if assign[i] == c] for c in range(columns)]
+        if any(not c for c in cols):
+            continue
+        lows = [sum(tiles[i]["h_min"] + GAP for i in c) for c in cols]
+        highs = [sum(tiles[i]["h_max"] + GAP for i in c) for c in cols]
+        noms = [sum(tiles[i]["h"] + GAP for i in c) for c in cols]
+        low_t, high_t = max(lows), min(highs)
+        target = min(max(sum(noms) / columns, low_t), max(high_t, low_t))
+        cost = (
+            round(max(0, low_t - high_t)),
+            sum((n - i) * row for c in cols for row, i in enumerate(c)),
+            sum(abs(v - target) for v in noms),
+        )
+        if best is None or cost < best[0]:
+            best = (cost, cols, target)
+
+    _, picked, target = best
+    out = []
+    for col in picked:
+        col_tiles = [dict(tiles[i]) for i in col]
+        delta = target - sum(t["h"] + GAP for t in col_tiles)
+        for tile in reversed(col_tiles):
+            if abs(delta) < 1:
+                break
+            new_h = min(max(tile["h"] + delta, tile["h_min"]), tile["h_max"])
+            delta -= new_h - tile["h"]
+            tile["h"] = new_h
+        for tile in col_tiles:
+            tile["h"] = round(tile["h"])
+            tile["aspect"] = col_w / tile["h"]
+        out.append(col_tiles)
+    return out
 
 
 def rounded_mask(size: tuple[int, int], radius: int):
@@ -648,7 +669,7 @@ def create_moodboard(
         else:
             heroes = pick_by_sharpness(frames, max_heroes)
 
-        cols = columns or choose_columns(len(heroes))
+        cols = min(columns or choose_columns(len(heroes)), len(heroes))
         log(f"Stitching {len(heroes)} frame(s) into {cols} columns")
         return render_collage(heroes, cols)
     finally:

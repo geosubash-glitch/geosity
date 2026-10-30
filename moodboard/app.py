@@ -8,11 +8,11 @@
 #
 # Run locally:
 #   pip install -r requirements.txt
-#   export ANTHROPIC_API_KEY=sk-ant-...
+#   export ANTHROPIC_API_KEY=sk-ant-...   # optional; without it shots are picked by sharpness
 #   python app.py                      # http://localhost:8000
 #
 # Environment:
-#   ANTHROPIC_API_KEY  required - your Claude API key
+#   ANTHROPIC_API_KEY  optional - Claude picks the shots; without it they're picked by sharpness (free)
 #   APP_PASSWORD       recommended - anyone with the link could otherwise spend your API credits
 #   SECRET_KEY         signs the login cookie (set any long random string)
 #   IG_COOKIES         optional - Instagram cookies.txt contents, for reels Instagram won't serve anonymously
@@ -46,6 +46,7 @@ for d in (BOARDS_DIR, UPLOADS_DIR):
 
 APP_PASSWORD = os.environ.get("APP_PASSWORD", "")
 MODEL = os.environ.get("MOODBOARD_MODEL", engine.DEFAULT_MODEL)
+USE_AI = bool(os.environ.get("ANTHROPIC_API_KEY", "").strip())
 VIDEO_EXTS = {".mp4", ".mov", ".m4v", ".webm", ".mkv", ".avi", ".3gp"}
 ID_RE = re.compile(r"^[A-Za-z0-9_-]{6,32}$")
 LINK_RE = re.compile(r"https?://[^\s<>\"']+", re.IGNORECASE)
@@ -146,7 +147,7 @@ def run_job(job_id: str, source: str, label: str, upload_path: Path | None) -> N
         set_job(job_id, step="Waiting for a free slot")
         with WORK_SLOT:
             set_job(job_id, status="running", step="Starting")
-            collage = engine.create_moodboard(source, MODEL, cookie_file=COOKIE_FILE, progress=report)
+            collage = engine.create_moodboard(source, MODEL, use_ai=USE_AI, cookie_file=COOKIE_FILE, progress=report)
         save_board(job_id, collage, label)
         set_job(job_id, status="done", step="Done")
     except engine.MoodboardError as exc:

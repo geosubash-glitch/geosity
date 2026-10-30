@@ -1,16 +1,18 @@
 # Moodboard
 
+> **No API key or server? Use the free version:** <https://geosubash-glitch.github.io/geosity/collage/>. It runs on your phone with on-device models. It needs a saved video rather than a link (see `../collage/`). This folder is the optional server version, which can also take Instagram links.
+
 Share a reel from Instagram (or TikTok / YouTube Shorts) and get back one tall, Pinterest-style image: `moodboard_scroll.jpg`. It holds only the hero shots (crisp full-body and full-outfit reveals, best angles, key poses) in a 2- or 3-column masonry layout with 12px dark gaps. No text, no swatches.
 
 How the frames are chosen:
 1. Every shot is sampled several times, and only the sharpest frame survives, which cuts out motion blur.
-2. Claude then keeps the clean reveals and drops:
+2. Claude (if you give it a key) keeps the clean reveals and drops:
    - awkward expressions
    - transitions
    - cut-off poses
    - repeats
 
-   It also marks where the person or item is.
+   It also marks where the person or item is. Without a key, frames are picked by sharpness, with repeats removed.
 3. Each frame is cropped around the subject, so head and feet stay in and tile heights vary like a real Pinterest board.
 
 - `reel_to_moodboard.py`: the engine. Also works on its own from a terminal.
@@ -18,15 +20,13 @@ How the frames are chosen:
 
 ## Set it up from your phone
 
-You need two things: a Claude API key, and a free Render account to run the server.
+You need a free Render account to run the server. A Claude API key is optional.
 
-1. **Get an API key.** Go to [console.anthropic.com](https://console.anthropic.com), open *API Keys*, and create one. Add a few dollars of credit under *Billing*. Copy the key (it starts with `sk-ant-`).
-2. **Deploy.** Open this link: <https://render.com/deploy?repo=https://github.com/geosubash-glitch/geosity>
+1. **Deploy.** Open this link: <https://render.com/deploy?repo=https://github.com/geosubash-glitch/geosity>
    - Sign in with GitHub.
-   - It asks for two values:
-     - `ANTHROPIC_API_KEY`: paste your key.
-     - `APP_PASSWORD`: pick any password. It stops strangers from using your credits.
+   - It asks for `APP_PASSWORD`: pick any password. It keeps strangers off your server.
    - Tap **Apply** and wait for the first build (several minutes).
+2. **Optional: let Claude pick the shots.** Create a key at [console.anthropic.com](https://console.anthropic.com) (this needs paid credit). Then add it in Render under *Environment* as `ANTHROPIC_API_KEY`.
 3. **Open your app.** Render shows a link like `https://reel-moodboard-xxxx.onrender.com`. Open it and sign in with your password.
 4. **Hook up the share button.** In the app, tap **Set up sharing from Instagram** and follow the steps for your phone:
    - Android: install it as an app.
@@ -47,7 +47,7 @@ After that: Instagram → Share → *Share to…* / *More* → **Moodboard**.
 
 | Name | Needed | What it does |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | yes | Claude API key |
+| `ANTHROPIC_API_KEY` | no | Claude picks the shots; without it, sharpness does |
 | `APP_PASSWORD` | strongly recommended | Password for the app |
 | `SECRET_KEY` | set by Render | Signs the login cookie |
 | `IG_COOKIES` | no | Instagram `cookies.txt` contents |
@@ -57,7 +57,7 @@ After that: Instagram → Share → *Share to…* / *More* → **Moodboard**.
 
 ```
 pip install -r requirements.txt
-export ANTHROPIC_API_KEY=sk-ant-...
+export ANTHROPIC_API_KEY=sk-ant-...            # optional
 python app.py                                  # web app on http://localhost:8000
 python reel_to_moodboard.py reel.mp4           # or one collage straight from the terminal
 python reel_to_moodboard.py reel.mp4 --columns 3 --max-frames 8
