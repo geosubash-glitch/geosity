@@ -1,0 +1,9 @@
+{
+  "name": "moodboard-worker",
+  "private": true,
+  "description": "Processes reels for the online moodboard on GitHub Actions. See process.mjs.",
+  "type": "module",
+  "dependencies": {
+    "playwright": "1.63.0"
+  }
+}

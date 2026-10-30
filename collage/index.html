@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Moodboard">
-<meta name="description" content="A moodboard that grows with every reel you add. Runs on your phone; nothing is uploaded.">
+<meta name="description" content="An online moodboard that grows with every reel you add.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -25,17 +25,21 @@
   p { margin:0 0 12px; }
   .muted { color:var(--muted); }
   #count { color:var(--muted); font-size:14px; min-height:21px; margin:0; }
-  .add { display:block; margin:16px 4px 0; padding:18px; border-radius:14px; text-align:center; cursor:pointer;
-    background:var(--accent); color:#111; font-weight:600; font-size:17px; }
-  .add.disabled { opacity:.5; pointer-events:none; }
-  .add input { display:none; }
+  form.addrow { display:flex; gap:8px; margin:16px 4px 0; }
+  form.addrow input { flex:1; min-width:0; font:inherit; color:var(--text); background:var(--panel);
+    border:1px solid var(--line); border-radius:12px; padding:13px 14px; }
+  form.addrow input:focus { outline:2px solid var(--accent); outline-offset:1px; }
+  .addmain { margin:8px 4px 0; width:calc(100% - 8px); display:block; padding:15px; font-size:16px; }
+  .sub { margin:10px 4px 0; font-size:14px; }
+  .sub a { color:var(--muted); }
+  #pendingBox { margin:12px 4px 0; padding:12px 14px; border-radius:12px; background:var(--panel); border:1px solid var(--line); font-size:14px; }
+  #pending { margin:0; padding:0; list-style:none; }
+  #pending li { margin:2px 0; color:var(--muted); }
+  #pending a { color:var(--text); }
+  #pending li.stuck a { color:#ff9b8f; }
   .note { margin:12px 4px 0; padding:12px 14px; border-radius:12px; background:var(--panel); border:1px solid var(--line);
     white-space:pre-wrap; font-size:14px; }
   .note.err { color:#ff9b8f; }
-  .work { margin:12px 4px 0; padding:14px; border-radius:12px; background:var(--panel); border:1px solid var(--line); }
-  .track { height:6px; background:#26262b; border-radius:99px; overflow:hidden; margin:0 0 8px; }
-  #bar { height:100%; width:0; background:var(--accent); transition:width .25s ease; }
-  #step { margin:0; font-size:14px; color:var(--muted); }
   .tools { display:flex; gap:8px; align-items:center; margin:16px 4px 12px; flex-wrap:wrap; }
   .seg { display:flex; gap:4px; align-items:center; }
   .seg > span { color:var(--muted); font-size:13px; margin-right:2px; }
@@ -59,7 +63,6 @@
   .empty h2 { font-size:17px; margin:0 0 8px; }
   .empty ol { padding-left:20px; margin:0; }
   .empty li { margin-bottom:8px; color:#cfcfd6; }
-  .hint { margin:16px 4px 0; font-size:13px; color:var(--muted); }
   footer { margin:28px 4px 0; display:flex; gap:12px; align-items:center; flex-wrap:wrap; font-size:13px; color:var(--muted); }
   footer button { background:none; border:0; color:var(--muted); text-decoration:underline; font:inherit; cursor:pointer; padding:0; }
   .export { margin:0 4px 20px; }
@@ -68,8 +71,7 @@
   .lightbox { position:fixed; inset:0; background:rgba(0,0,0,.9); display:flex; flex-direction:column;
     align-items:center; justify-content:center; gap:14px; padding:20px; z-index:10; }
   .lightbox img { max-width:100%; max-height:calc(100% - 70px); border-radius:12px; object-fit:contain; }
-  .lightbox .row { display:flex; gap:10px; }
-  .offscreen { position:fixed; left:0; top:0; width:2px; height:2px; opacity:0; pointer-events:none; }
+  .lightbox .row { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
 </style>
 </head>
 <body>
@@ -81,23 +83,23 @@
       <p id="count"></p>
     </header>
 
-    <label class="add" id="addBtn">Add reels
-      <input type="file" id="file" accept="video/*" multiple>
-    </label>
+    <form class="addrow" id="addForm" autocomplete="off">
+      <input type="url" id="link" inputmode="url" placeholder="Paste a reel link" aria-label="Reel link">
+      <button class="btn" type="button" id="paste">Paste</button>
+    </form>
+    <button class="btn main addmain" type="submit" form="addForm">Add to board</button>
+    <p class="sub"><a id="upload" href="#" target="_blank" rel="noopener">Upload a video instead</a></p>
 
-    <div class="work" id="work" hidden>
-      <div class="track"><div id="bar"></div></div>
-      <p id="step" aria-live="polite">Starting</p>
-    </div>
+    <div id="pendingBox" hidden><ul id="pending"></ul></div>
 
     <p class="note" id="notice" role="status" hidden></p>
 
     <div class="empty" id="empty" hidden>
       <h2>Your board is empty</h2>
       <ol>
-        <li>In Instagram, tap <strong>Share</strong> on a reel. If you see <strong>Download</strong>, tap it. No Download button? Screen-record the reel instead.</li>
-        <li>Tap <strong>Add reels</strong> and pick one or more videos. Each one adds its best shots: sharp, full-body, eyes open.</li>
-        <li>Keep adding new reels whenever you like. The board is saved on this phone and grows each time.</li>
+        <li>In Instagram, tap <strong>Share</strong> on a reel, then <strong>Copy link</strong>.</li>
+        <li>Paste it above and tap <strong>Add to board</strong>. GitHub opens with it filled in; tap <strong>Submit</strong>.</li>
+        <li>You can close the app. In a few minutes the reel's best shots (sharp, full body, eyes open) appear here, and every new reel adds to the board.</li>
       </ol>
     </div>
 
@@ -114,11 +116,8 @@
 
     <div id="board"></div>
 
-    <p class="hint" id="iosHint" hidden>On iPhone, add this page to your Home Screen (Share → Add to Home Screen). Otherwise Safari may clear your board if you don't open it for a while.</p>
-
     <footer>
-      <span>Saved on this phone only. Tap a shot to remove it.</span>
-      <button type="button" id="clear">Clear board</button>
+      <span>Your board is online and public, like the rest of this site. Tap a shot to open or remove it.</span>
     </footer>
   </section>
 
@@ -137,7 +136,9 @@
   <img id="lbImg" alt="Shot">
   <div class="row">
     <button class="btn" id="lbClose" type="button">Close</button>
-    <button class="btn" id="lbRemove" type="button">Remove from board</button>
+    <a class="btn" id="lbSource" href="#" target="_blank" rel="noopener">Original reel</a>
+    <a class="btn" id="lbRemove" href="#" target="_blank" rel="noopener">Remove shot</a>
+    <a class="btn" id="lbRemoveReel" href="#" target="_blank" rel="noopener">Remove whole reel</a>
   </div>
 </div>
 

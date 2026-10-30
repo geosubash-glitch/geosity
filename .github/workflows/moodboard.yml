@@ -1,0 +1,104 @@
+# Online moodboard worker.
+# Open an issue titled "Add reel" with one or more reel links (or attached
+# videos) and this adds their best shots to board/, then redeploys Pages so the
+# board at /collage/ updates. "Remove shot <id>" / "Remove reel <id>" take
+# one shot, or every shot from one reel, off the board.
+# A comment on an open "Add reel" issue (for example with the video attached
+# after a link failed) is processed the same way.
+# Only the repository owner's issues and comments are acted on.
+name: Moodboard
+
+on:
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write   # commit board/
+  issues: write     # reply and close
+  actions: write    # start the Pages deploy
+
+# One at a time, so board.json updates never collide.
+concurrency:
+  group: moodboard
+  cancel-in-progress: false
+
+jobs:
+  board:
+    if: >-
+      (github.event_name == 'issues'
+        && github.event.issue.user.login == github.repository_owner
+        && (startsWith(github.event.issue.title, 'Add reel') || startsWith(github.event.issue.title, 'Remove shot') || startsWith(github.event.issue.title, 'Remove reel')))
+      || (github.event_name == 'issue_comment'
+        && github.event.comment.user.login == github.repository_owner
+        && github.event.issue.state == 'open'
+        && !github.event.issue.pull_request
+        && startsWith(github.event.issue.title, 'Add reel'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install tools
+        working-directory: tools/moodboard
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q ffmpeg
+          python -m pip install --upgrade yt-dlp
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Process the request
+        id: work
+        continue-on-error: true
+        working-directory: tools/moodboard
+        env:
+          MODE: ${{ startsWith(github.event.issue.title, 'Remove ') && 'remove' || 'add' }}
+          TITLE: ${{ github.event.issue.title }}
+          TEXT: ${{ github.event_name == 'issue_comment' && github.event.comment.body || github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          GITHUB_TOKEN: ${{ github.token }}
+          IG_COOKIES: ${{ secrets.IG_COOKIES }}
+          SUMMARY_FILE: ${{ runner.temp }}/summary.md
+        run: node process.mjs "$MODE"
+
+      - name: Save the board and redeploy
+        if: steps.work.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add board
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -q -m "Moodboard: update from #$ISSUE_NUMBER"
+          for i in 1 2 3 4; do
+            if git pull -q --rebase origin main && git push -q origin HEAD:main; then break; fi
+            sleep $((i * 4))
+          done
+          # Pushes made with the workflow token don't start other workflows, so start the Pages deploy directly.
+          gh workflow run static.yml --ref main
+
+      - name: Reply on the issue
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          OUTCOME: ${{ steps.work.outcome }}
+        run: |
+          body="$RUNNER_TEMP/summary.md"
+          [ -s "$body" ] || echo "Something went wrong before the reel could be processed. The run log has details." > "$body"
+          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file "$body"
+          if [ "$OUTCOME" = "success" ]; then gh issue close "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY"; fi

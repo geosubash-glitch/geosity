@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moodboard worker</title>
+<!-- Used by tools/moodboard/process.mjs on GitHub Actions: runs pipeline.js on
+     one video in a headless browser and hands back the hero shots. -->
+<style>.offscreen { position:fixed; left:0; top:0; width:2px; height:2px; opacity:0; pointer-events:none; }</style>
+</head>
+<body>
+<input type="file" id="f" accept="video/*">
+<script type="module">
+import { processVideo } from './pipeline.js';
+
+const toBase64 = (blob) => new Promise((resolve, reject) => {
+  const r = new FileReader();
+  r.onload = () => resolve(String(r.result).split(',')[1]);
+  r.onerror = () => reject(r.error);
+  r.readAsDataURL(blob);
+});
+
+window.processPicked = async () => {
+  const file = document.getElementById('f').files[0];
+  try {
+    const shots = await processVideo(file, (text) => console.log(`[step] ${text}`));
+    return { shots: await Promise.all(shots.map(async ({ blob, ...rest }) => ({ ...rest, jpeg: await toBase64(blob) }))) };
+  } catch (err) {
+    return { error: err.userMessage || String(err.message || err) };
+  }
+};
+window.workerReady = true;
+</script>
+</body>
+</html>
