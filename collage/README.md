@@ -1,32 +1,34 @@
-# Moodboard (Reel Collage)
+# Moodboard
 
-A moodboard that grows with every reel you add. Each reel contributes its best shots, the board is saved on the phone between visits, and **Save as image** exports it as one tall Pinterest-style picture (`moodboard_scroll.jpg`). Very big boards are split across a few images, because phones can't draw one endless picture. It's free, runs entirely in the phone's browser, and uploads nothing.
+An online moodboard that grows with every reel you add. It's free to run, needs no API key, and you can close your phone while it works.
 
-- **Add several reels at once.** On Android, after adding the page to the home screen, you can share one or more videos straight from the gallery.
-- **Newest reel first** on the board. Tap a shot to remove it. A reel that's already on the board gets skipped.
-- **Storage:** the board lives in the browser's own storage (IndexedDB) on that phone. On iPhone, add the page to the Home Screen, or Safari may clear it if the page isn't opened for a while.
+**Open it:** <https://geosubash-glitch.github.io/geosity/collage/>
 
-**Use it:** <https://geosubash-glitch.github.io/geosity/collage/>
+## Using it
 
-## How it picks shots
+1. In Instagram, tap **Share** on a reel, then **Copy link**. On Android, once the page is on your home screen, you can share the link straight to **Moodboard** instead.
+2. In the app, paste it and tap **Add to board**. GitHub opens with an "Add reel" issue already filled in; tap **Submit**.
+3. Close the app if you like. GitHub's servers process the reel, and its best shots appear on the board a few minutes later. The app shows reels still in progress, and any that need you.
+4. **Save as image** exports the board as `moodboard_scroll.jpg`. A big board is split evenly across a few images, because phones can't draw one endless picture.
+5. Tap a shot to see the original reel, remove the shot, or remove the whole reel.
 
-1. Scans the video, finds the cuts, and scores every moment for sharpness, so motion-blurred frames lose.
-2. Takes the sharpest frame from the middle of each shot. Transitions happen at the edges of shots, so they're skipped.
-3. Runs small on-device models on each candidate:
-   - MoveNet for body pose: is the whole body in frame?
-   - FaceMesh for eyes and mouth: eyes open, mouth not caught mid-word?
-   - An expression model: no grimace?
-4. Drops repeats and keeps the best 3–8 shots.
-5. Saves the chosen frames with the box around the person.
-6. On export, crops each shot around the person so head and feet stay in. It varies the tile heights and packs them into 2–3 columns with 12px dark gaps, picking the arrangement that lets the columns end level.
+**If a link won't download** (Instagram often refuses servers that aren't logged in), the worker replies on the issue. Reply with the video attached, or use **Upload a video instead**. Optional: store your Instagram `cookies.txt` contents as a repository secret named `IG_COOKIES`, and logged-in downloads will work.
 
-## Files
+## How it works
 
-- `index.html`, `app.js`: the page and everything it does.
-- `sw.js`: works offline after the first visit. It also receives videos shared from the Android gallery once the page has been added to the home screen.
-- `vendor/human/`: [Human](https://github.com/vladmandic/human) 3.3.6 (MIT) and the four models it needs, about 10 MB, served from this site.
+- `index.html`, `app.js`: the board page. It reads `../board/board.json`, lays the shots out with `layout.js`, and hands new reels to GitHub as pre-filled issues.
+- `.github/workflows/moodboard.yml` runs on your "Add reel" / "Remove shot" / "Remove reel" issues and comments. Anyone else's are ignored. It runs `tools/moodboard/process.mjs`, which:
+  1. downloads the reel (yt-dlp, or the attached file) and converts it to WebM;
+  2. opens `worker.html` in a headless browser, which runs `pipeline.js`:
+     - finds the cuts;
+     - keeps the sharpest mid-shot frame of each shot;
+     - checks each frame with on-device models (Human 3.3.6, MIT, vendored): full body in frame, eyes open, mouth not caught mid-word, no grimace;
+     - drops repeats and keeps the best 3–8;
+  3. writes the shots to `board/`, commits, and redeploys GitHub Pages.
+- **Layout:** crops keep the whole person, tile heights stagger, and the columns are arranged so they end level.
 
-## Limits
+## Good to know
 
-- **Links can't be downloaded.** Fetching videos from a link needs a server, and Instagram blocks browsers from doing it directly. Save or screen-record the reel first. The server version in `../moodboard/` can take links if you ever host it.
-- **The models judge visible things only:** sharpness, framing, open eyes and mouth, expression. They can't judge taste the way a person (or Claude) would.
+- **The board is public**, like the rest of this site, and so are the "Add reel" issues with their links.
+- **Each reel adds about 1 MB to the repository.** GitHub Pages sites are limited to 1 GB, which is several hundred reels.
+- **Speed:** processing runs on the free GitHub runner's processor, so a 30-second reel takes a few minutes from Submit to showing up.

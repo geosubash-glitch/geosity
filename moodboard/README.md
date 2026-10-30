@@ -1,6 +1,6 @@
 # Moodboard
 
-> **No API key or server? Use the free version:** <https://geosubash-glitch.github.io/geosity/collage/>. It runs on your phone with on-device models. It needs a saved video rather than a link (see `../collage/`). This folder is the optional server version, which can also take Instagram links.
+> **Looking for the free online board?** It lives in `../collage/`: <https://geosubash-glitch.github.io/geosity/collage/>. It needs no API key or server of your own, because GitHub processes the reels. This folder is an optional self-hosted server version.
 
 Share a reel from Instagram (or TikTok / YouTube Shorts) and get back one tall, Pinterest-style image: `moodboard_scroll.jpg`. It holds only the hero shots (crisp full-body and full-outfit reveals, best angles, key poses) in a 2- or 3-column masonry layout with 12px dark gaps. No text, no swatches.
 

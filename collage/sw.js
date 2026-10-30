@@ -1,15 +1,14 @@
-// Reel Collage service worker.
-// - Keeps the page, the vision library and its models on the phone after the
-//   first visit, so later runs start fast and work offline.
-// - Receives videos shared from the Android gallery (Web Share Target), one
-//   or several at a time, and hands them to the page.
+// Moodboard service worker.
+// - Keeps the page and its scripts on the phone so it opens fast.
+// - Receives links shared from Instagram & co. (Web Share Target) and hands
+//   them to the page, which sends them on to GitHub.
+// The board itself (../board/) always comes fresh from the network.
 // Cache names all start with "reel-collage-" so this never touches the rest of
 // the site's caches. Another worker on this site may clear ours; everything
 // here re-downloads on demand, so that only costs a refetch.
 
-const CACHE = 'reel-collage-v2';
-const SHARE_CACHE = 'reel-collage-share';
-const SHELL = ['./', './index.html', './app.js', './manifest.webmanifest', './icon-192.png', './apple-touch-icon.png'];
+const CACHE = 'reel-collage-v3';
+const SHELL = ['./', './index.html', './app.js', './layout.js', './manifest.webmanifest', './icon-192.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -18,30 +17,27 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('reel-collage-') && k !== CACHE && k !== SHARE_CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('reel-collage-') && k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
 
 async function receiveShare(request) {
   const scope = self.registration.scope;
+  let link = '';
+  let hasFile = false;
   try {
     const form = await request.formData();
-    const files = form.getAll('video').filter((f) => f && typeof f !== 'string' && f.size > 0);
-    if (files.length) {
-      const cache = await caches.open(SHARE_CACHE);
-      const batch = Date.now();
-      for (let i = 0; i < files.length; i++) {
-        await cache.put(`shared-video-${batch}-${i}`, new Response(files[i], {
-          headers: { 'content-type': files[i].type || 'video/mp4', 'x-name': encodeURIComponent(files[i].name || 'video') },
-        }));
-      }
-      return Response.redirect(new URL('./?shared=1', scope).href, 303);
-    }
-  } catch (err) {
-    // fall through to the link message
+    const text = ['url', 'text', 'title'].map((k) => form.get(k) || '').join(' ');
+    link = (text.match(/https?:\/\/[^\s<>"')\]]+/i) || [''])[0];
+    hasFile = form.getAll('video').some((f) => f && typeof f !== 'string' && f.size > 0);
+  } catch {
+    // fall through
   }
-  return Response.redirect(new URL('./?link=1', scope).href, 303);
+  const target = new URL('./', scope);
+  if (link) target.searchParams.set('link', link);
+  else if (hasFile) target.searchParams.set('video', '1');
+  return Response.redirect(target.href, 303);
 }
 
 self.addEventListener('fetch', (e) => {
@@ -53,9 +49,10 @@ self.addEventListener('fetch', (e) => {
     return;
   }
   if (e.request.method !== 'GET' || e.request.headers.has('range')) return;
+  if (url.pathname.includes('/board/') && url.pathname.endsWith('.json')) return; // always live
 
-  if (url.pathname.includes('/vendor/') || /\.(png|bin)$/.test(url.pathname)) {
-    // Big, versioned files: cache first.
+  if (/\.(png|jpg|bin)$/.test(url.pathname)) {
+    // Images never change once published: cache first.
     e.respondWith(
       caches.match(e.request).then((hit) => hit || fetch(e.request).then((res) => {
         if (res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(e.request, copy)); }
@@ -65,7 +62,7 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // The page and its script: network first so updates arrive, cache when offline.
+  // The page and its scripts: network first so updates arrive, cache when offline.
   e.respondWith(
     fetch(e.request).then((res) => {
       if (res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(e.request, copy)); }
