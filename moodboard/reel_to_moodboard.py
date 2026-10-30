@@ -6,7 +6,7 @@
 # palette, aesthetic tags and a short vibe description written by Claude.
 #
 # Install:
-#   pip install anthropic opencv-python-headless scenedetect yt-dlp numpy
+#   pip install anthropic opencv-python scenedetect yt-dlp numpy
 #
 # Run:
 #   export ANTHROPIC_API_KEY=sk-ant-...
@@ -18,7 +18,9 @@
 #   - claude-3-5-sonnet-20241022 has been retired by Anthropic, so the default
 #     model is the current Sonnet (claude-sonnet-5-5). Use --model to change it.
 #   - Downloading from Instagram/TikTok can require cookies for private or
-#     age-gated posts; pass --cookies-from-browser chrome (or firefox, etc.).
+#     age-gated posts; pass --cookies-from-browser chrome (or firefox, etc.),
+#     or --cookies cookies.txt (Netscape format).
+#   - app.py in this folder wraps this script in a phone-friendly web app.
 
 import argparse
 import base64
@@ -28,6 +30,7 @@ import os
 import re
 import sys
 import tempfile
+import threading
 import webbrowser
 from pathlib import Path
 
@@ -58,20 +61,30 @@ URL_RE = re.compile(r"^https?://", re.IGNORECASE)
 
 REQUIRED_MODULES = {
     # import name: pip package
-    "cv2": "opencv-python-headless",
+    "cv2": "opencv-python",
     "numpy": "numpy",
     "scenedetect": "scenedetect",
     "anthropic": "anthropic",
 }
 
 
-def fail(message: str, code: int = 1) -> None:
-    print(f"\n[error] {message}", file=sys.stderr)
-    sys.exit(code)
+class MoodboardError(Exception):
+    """A problem worth showing to the user as-is (bad input, download or API failure)."""
+
+
+# Per-thread progress callback, so the web app can show live status per job.
+_progress = threading.local()
+
+
+def fail(message: str) -> None:
+    raise MoodboardError(message)
 
 
 def log(message: str) -> None:
-    print(f"[reel2mood] {message}")
+    print(f"[reel2mood] {message}", flush=True)
+    reporter = getattr(_progress, "reporter", None)
+    if reporter:
+        reporter(message)
 
 
 def check_dependencies(need_ytdlp: bool) -> None:
@@ -98,39 +111,63 @@ def check_dependencies(need_ytdlp: bool) -> None:
 # ---------------------------------------------------------------------------
 
 
-def download_video(url: str, workdir: str, cookies_browser: str | None) -> str:
+ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def explain_download_error(exc: Exception) -> str:
+    text = ANSI_RE.sub("", str(exc)).replace("ERROR: ", "").strip()
+    lowered = text.lower()
+    if any(k in lowered for k in ("login", "cookies", "rate-limit", "rate limit", "not available", "private")):
+        return (
+            "Instagram wouldn't hand over this video without a logged-in session. "
+            "Add Instagram cookies (see the setup notes) or upload the video file instead.\n\n"
+            f"Details: {text}"
+        )
+    if "unsupported url" in lowered:
+        return f"That link isn't a video page yt-dlp knows how to read.\n\nDetails: {text}"
+    return f"Couldn't download the video.\n\nDetails: {text}"
+
+
+def download_video(url: str, workdir: str, cookies_browser: str | None = None, cookie_file: str | None = None) -> str:
     import yt_dlp
 
-    log(f"Downloading {url}")
+    log("Downloading the video")
     opts = {
         # Video-only MP4 first: no audio needed, and it avoids an ffmpeg merge.
-        "format": "bv*[ext=mp4][height<=1920]/b[ext=mp4]/bv*/b",
+        # 1280px tall is plenty for 1024px frames and keeps downloads small.
+        "format": "bv*[ext=mp4][height<=1280]/b[ext=mp4][height<=1280]/bv*[ext=mp4]/b[ext=mp4]/bv*/b",
         "outtmpl": os.path.join(workdir, "reel.%(ext)s"),
         "noplaylist": True,
         "quiet": True,
         "no_warnings": True,
+        "socket_timeout": 30,
     }
     if cookies_browser:
         opts["cookiesfrombrowser"] = (cookies_browser,)
+    if cookie_file:
+        opts["cookiefile"] = cookie_file
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=True)
+            if info.get("_type") == "playlist":
+                # Carousel posts: take the first video entry.
+                entries = [e for e in info.get("entries") or [] if e]
+                if not entries:
+                    fail("That post has no video in it.")
+                info = entries[0]
             downloads = info.get("requested_downloads") or []
             path = downloads[0].get("filepath") if downloads else ydl.prepare_filename(info)
     except yt_dlp.utils.DownloadError as exc:
-        fail(
-            f"yt-dlp could not download the video: {exc}\n"
-            "If the post is private or login-gated, retry with --cookies-from-browser chrome."
-        )
+        fail(explain_download_error(exc))
     if not path or not os.path.isfile(path):
         fail("yt-dlp reported success but no video file was written.")
-    log(f"Saved to {path}")
+    log("Video downloaded")
     return path
 
 
-def resolve_source(source: str, workdir: str, cookies_browser: str | None) -> str:
+def resolve_source(source: str, workdir: str, cookies_browser: str | None = None, cookie_file: str | None = None) -> str:
     if URL_RE.match(source):
-        return download_video(source, workdir, cookies_browser)
+        return download_video(source, workdir, cookies_browser, cookie_file)
     path = Path(source).expanduser()
     if not path.exists():
         fail(f"Video file not found: {path}")
@@ -371,7 +408,7 @@ def analyse_frames(frames: list[dict], model: str) -> dict:
     except anthropic.AuthenticationError:
         fail("Anthropic rejected the API key. Set ANTHROPIC_API_KEY to a valid key.")
     except anthropic.NotFoundError:
-        fail(f"Model '{model}' was not found or is retired. Try --model {DEFAULT_MODEL}.")
+        fail(f"Model '{model}' was not found or is retired. Try {DEFAULT_MODEL}.")
     except anthropic.RateLimitError:
         fail("Rate limited by the Anthropic API. Wait a minute and try again.")
     except anthropic.APIStatusError as exc:
@@ -508,13 +545,13 @@ PAGE_TEMPLATE = """<!doctype html>
   @media (max-width: 860px) {{ .layout {{ grid-template-columns: 1fr; }} }}
   .grid {{ column-count: 2; column-gap: 14px; }}
   @media (min-width: 1100px) {{ .grid {{ column-count: 3; }} }}
-  @media (max-width: 520px) {{ .grid {{ column-count: 1; }} }}
+  @media (max-width: 520px) {{ .grid {{ column-gap: 10px; }} .tile {{ margin-bottom: 10px; border-radius: 10px; }} }}
   .tile {{
     break-inside: avoid; margin: 0 0 14px; border-radius: 14px; overflow: hidden;
     background: var(--panel); position: relative;
   }}
   .tile img {{ display: block; width: 100%; height: auto; transition: transform .35s ease; cursor: zoom-in; }}
-  .tile:hover img {{ transform: scale(1.03); }}
+  @media (hover: hover) {{ .tile:hover img {{ transform: scale(1.03); }} }}
   .tile span {{
     position: absolute; left: 10px; bottom: 10px; font-size: 11px; padding: 3px 8px;
     border-radius: 6px; background: rgba(0,0,0,.55); color: #fff;
@@ -542,11 +579,19 @@ PAGE_TEMPLATE = """<!doctype html>
     padding: 8px 14px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none;
   }}
   .toast.show {{ opacity: 1; }}
-  footer {{ margin-top: 32px; color: var(--muted); font-size: 12px; }}
+  footer {{ margin-top: 32px; color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }}
+  footer a {{ color: var(--muted); }}
+  .nav {{ display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }}
+  .nav a, .nav button {{
+    font-family: inherit; font-size: 13px; font-weight: 600; line-height: 1; color: var(--text); background: var(--panel);
+    border: 1px solid var(--line); border-radius: 999px; padding: 9px 14px; text-decoration: none; cursor: pointer;
+  }}
+  .nav .grow {{ flex: 1; }}
 </style>
 </head>
 <body>
 <div class="wrap">
+{nav}
   <header>
     <h1>{title}</h1>
     <div class="badges">
@@ -600,7 +645,8 @@ PAGE_TEMPLATE = """<!doctype html>
 """
 
 
-def build_html(board: dict, source: str) -> str:
+def build_html(board: dict, source: str, nav_html: str = "") -> str:
+    """Render the moodboard page. nav_html is trusted markup the web app adds on top."""
     esc = html.escape
     tiles = "\n".join(
         f'      <figure class="tile"><img src="data:image/jpeg;base64,{f["b64"]}" '
@@ -626,8 +672,41 @@ def build_html(board: dict, source: str) -> str:
         swatches=swatches,
         tags=tags,
         vibe=esc(board["vibe"]),
-        source=esc(source),
+        source=f'<a href="{esc(source)}">{esc(source)}</a>' if URL_RE.match(source) else esc(source),
+        nav=nav_html,
     )
+
+
+def create_moodboard(
+    source: str,
+    model: str = DEFAULT_MODEL,
+    cookies_browser: str | None = None,
+    cookie_file: str | None = None,
+    progress=None,
+) -> dict:
+    """Run the whole pipeline. Returns the cleaned board dict (frames include "b64").
+
+    progress, if given, is called with short status strings as work proceeds.
+    Raises MoodboardError for anything the user should see.
+    """
+    _progress.reporter = progress
+    try:
+        with tempfile.TemporaryDirectory(prefix="reel2mood_") as workdir:
+            video_path = resolve_source(source, workdir, cookies_browser, cookie_file)
+            candidates = extract_candidates(video_path)
+
+        log("Picking the sharpest frames")
+        frames = keep_sharpest(candidates)
+        for f in frames:
+            f["b64"] = encode_jpeg_b64(f["image"])
+
+        log("Asking Claude to read the look")
+        raw = analyse_frames(frames, model)
+        board = clean_result(raw, frames)
+        log("Building the board")
+        return board
+    finally:
+        _progress.reporter = None
 
 
 # ---------------------------------------------------------------------------
@@ -641,6 +720,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--out", default=".", help="Directory for moodboard.html (default: current directory)")
     p.add_argument("--model", default=DEFAULT_MODEL, help=f"Claude model ID (default: {DEFAULT_MODEL})")
     p.add_argument("--cookies-from-browser", metavar="BROWSER", help="Pass browser cookies to yt-dlp (chrome, firefox, ...)")
+    p.add_argument("--cookies", metavar="FILE", help="Netscape-format cookies.txt for yt-dlp")
     p.add_argument("--no-open", action="store_true", help="Don't open the moodboard in a browser")
     return p.parse_args()
 
@@ -656,16 +736,7 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / "moodboard.html"
 
-    with tempfile.TemporaryDirectory(prefix="reel2mood_") as workdir:
-        video_path = resolve_source(args.source, workdir, args.cookies_from_browser)
-        candidates = extract_candidates(video_path)
-
-    frames = keep_sharpest(candidates)
-    for f in frames:
-        f["b64"] = encode_jpeg_b64(f["image"])
-
-    raw = analyse_frames(frames, args.model)
-    board = clean_result(raw, frames)
+    board = create_moodboard(args.source, args.model, args.cookies_from_browser, args.cookies)
 
     out_path.write_text(build_html(board, args.source), encoding="utf-8")
     log(f"{board['primary_category']} / {board['sub_style']}")
@@ -678,5 +749,9 @@ def main() -> None:
 if __name__ == "__main__":
     try:
         main()
+    except MoodboardError as exc:
+        print(f"\n[error] {exc}", file=sys.stderr)
+        sys.exit(1)
     except KeyboardInterrupt:
-        fail("Interrupted.", code=130)
+        print("\n[error] Interrupted.", file=sys.stderr)
+        sys.exit(130)
