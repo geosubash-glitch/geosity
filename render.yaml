@@ -1,0 +1,17 @@
+# Render Blueprint for the Moodboard app in moodboard/.
+# Render dashboard -> New -> Blueprint -> pick this repo. It asks for the two secrets below.
+services:
+  - type: web
+    name: reel-moodboard
+    runtime: docker
+    plan: free
+    dockerfilePath: ./moodboard/Dockerfile
+    dockerContext: ./moodboard
+    healthCheckPath: /healthz
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: APP_PASSWORD
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
