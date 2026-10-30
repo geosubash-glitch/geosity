@@ -2,7 +2,7 @@
 # app.py - phone-friendly web app around reel_to_moodboard.py
 #
 # Share a Reel from Instagram (or TikTok / YouTube Shorts) straight into this
-# app and get a moodboard back. Android: install the site as an app and it
+# app and get a hero-shot collage back. Android: install the site as an app and it
 # appears in the share sheet. iPhone: a two-action Shortcut does the same.
 # The /setup page walks through both.
 #
@@ -146,8 +146,8 @@ def run_job(job_id: str, source: str, label: str, upload_path: Path | None) -> N
         set_job(job_id, step="Waiting for a free slot")
         with WORK_SLOT:
             set_job(job_id, status="running", step="Starting")
-            board = engine.create_moodboard(source, MODEL, cookie_file=COOKIE_FILE, progress=report)
-        save_board(job_id, board, label)
+            collage = engine.create_moodboard(source, MODEL, cookie_file=COOKIE_FILE, progress=report)
+        save_board(job_id, collage, label)
         set_job(job_id, status="done", step="Done")
     except engine.MoodboardError as exc:
         set_job(job_id, status="error", error=str(exc))
@@ -182,46 +182,38 @@ def board_dir(board_id: str) -> Path:
     return BOARDS_DIR / board_id
 
 
-def save_board(board_id: str, board: dict, label: str) -> None:
-    import cv2
+def save_board(board_id: str, collage, label: str) -> None:
+    from PIL import Image
 
     d = BOARDS_DIR / board_id
     d.mkdir(parents=True, exist_ok=True)
-    data = {
-        "title": board["title"],
-        "primary_category": board["primary_category"],
-        "sub_style": board["sub_style"],
-        "palette": board["palette"],
-        "tags": board["tags"],
-        "vibe": board["vibe"],
-        "selected": [{"b64": f["b64"], "time": f["time"]} for f in board["selected"]],
-        "source": label,
-        "created": time.time(),
-    }
-    (d / "board.json").write_text(json.dumps(data), encoding="utf-8")
-    thumb = engine.resize_to_max_side(board["selected"][0]["image"], 480)
-    cv2.imwrite(str(d / "thumb.jpg"), thumb, [int(cv2.IMWRITE_JPEG_QUALITY), 80])
+    engine.save_jpeg(collage, d / engine.OUTPUT_NAME)
+    # Gallery thumbnail: the top of the strip at 3:4, where the best shots sit.
+    width = 480
+    thumb = collage.resize((width, round(collage.height * width / collage.width)), Image.LANCZOS)
+    thumb.crop((0, 0, width, min(thumb.height, width * 4 // 3))).save(d / "thumb.jpg", "JPEG", quality=82)
+    meta = {"source": label, "created": time.time(), "width": collage.width, "height": collage.height}
+    (d / "meta.json").write_text(json.dumps(meta), encoding="utf-8")
 
 
 def load_board(board_id: str) -> dict:
-    path = board_dir(board_id) / "board.json"
-    if not path.exists():
+    d = board_dir(board_id)
+    if not (d / "meta.json").exists() or not (d / engine.OUTPUT_NAME).exists():
         abort(404)
-    return json.loads(path.read_text(encoding="utf-8"))
+    return json.loads((d / "meta.json").read_text(encoding="utf-8"))
 
 
 def list_boards() -> list[dict]:
     out = []
     for d in BOARDS_DIR.iterdir():
-        meta = d / "board.json"
+        meta = d / "meta.json"
         if not meta.exists():
             continue
         try:
             data = json.loads(meta.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             continue
-        out.append({"id": d.name, "title": data["title"], "category": data["primary_category"],
-                    "sub_style": data["sub_style"], "palette": data["palette"], "created": data["created"]})
+        out.append({"id": d.name, "created": data["created"]})
     return sorted(out, key=lambda b: b["created"], reverse=True)
 
 
@@ -260,12 +252,12 @@ button.ghost, .btn.ghost { background:var(--panel); color:var(--text); border:1p
 .boards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
 @media (min-width:560px) { .boards { grid-template-columns:repeat(3,minmax(0,1fr)); } }
 .bcard { display:block; text-decoration:none; background:var(--panel); border-radius:12px; overflow:hidden; }
-.bcard img { display:block; width:100%; aspect-ratio:3/4; object-fit:cover; background:#222; }
-.bcard .meta { padding:8px 10px 10px; }
-.bcard strong { display:block; font-size:14px; line-height:1.25; }
-.bcard small { color:var(--muted); font-size:12px; }
-.dots { display:flex; height:4px; }
-.dots i { flex:1; }
+.bcard img { display:block; width:100%; aspect-ratio:3/4; object-fit:cover; object-position:top; background:#222; }
+.nav { display:flex; gap:8px; align-items:center; margin-bottom:16px; }
+.nav .grow { flex:1; }
+.nav a, .nav button { font-size:13px; padding:9px 14px; border-radius:999px; background:var(--panel);
+  color:var(--text); border:1px solid var(--line); text-decoration:none; }
+.collage { display:block; width:100%; height:auto; border-radius:12px; }
 ol.steps { padding-left:20px; margin:0; }
 ol.steps li { margin:0 0 10px; }
 code { background:#232328; padding:2px 6px; border-radius:6px; font-size:14px; overflow-wrap:anywhere; }
@@ -312,11 +304,9 @@ def home():
         notice = '<p class="err">There was no link in what you shared. Copy the reel link and paste it below.</p>'
     cards = ""
     for b in list_boards():
-        dots = "".join(f'<i style="background:{p["hex"]}"></i>' for p in b["palette"])
         cards += (
-            f'<a class="bcard" href="/b/{b["id"]}"><img src="/b/{b["id"]}/thumb.jpg" alt="" loading="lazy">'
-            f'<div class="dots">{dots}</div><div class="meta"><strong>{html.escape(b["title"])}</strong>'
-            f'<small>{html.escape(b["category"])}</small></div></a>'
+            f'<a class="bcard" href="/b/{b["id"]}" aria-label="Open board">'
+            f'<img src="/b/{b["id"]}/thumb.jpg" alt="" loading="lazy"></a>'
         )
     boards_html = f'<div class="boards">{cards}</div>' if cards else '<p class="muted">No boards yet. Your first one will show up here.</p>'
     body = f"""
@@ -441,56 +431,53 @@ def job_status(job_id):
     return jsonify(status=job["status"], step=job["step"], error=job["error"])
 
 
-def board_for_render(data: dict) -> dict:
-    return {
-        "title": data["title"],
-        "primary_category": data["primary_category"],
-        "sub_style": data["sub_style"],
-        "palette": data["palette"],
-        "tags": data["tags"],
-        "vibe": data["vibe"],
-        "selected": data["selected"],
-    }
-
-
 @app.route("/b/<board_id>")
 def board_page(board_id):
     data = load_board(board_id)
-    nav = f"""  <nav class="nav">
-    <a href="/">← Boards</a><span class="grow"></span>
-    <button type="button" id="sharebtn" hidden>Share</button>
-    <a href="/b/{board_id}/download">Save</a>
-    <form method="post" action="/b/{board_id}/delete" onsubmit="return confirm('Delete this board?')" style="margin:0">
-      <button type="submit">Delete</button>
-    </form>
-  </nav>
-  <script>
-    addEventListener('DOMContentLoaded', () => {{
+    img = f"/b/{board_id}/{engine.OUTPUT_NAME}"
+    body = f"""
+    <nav class="nav">
+      <a href="/">← Boards</a><span class="grow"></span>
+      <button type="button" id="sharebtn" hidden>Share</button>
+      <a href="/b/{board_id}/download">Save</a>
+      <form method="post" action="/b/{board_id}/delete" onsubmit="return confirm('Delete this board?')" style="margin:0">
+        <button type="submit">Delete</button>
+      </form>
+    </nav>
+    <img class="collage" src="{img}" width="{data['width']}" height="{data['height']}" alt="Moodboard collage">
+    <script>
       const b = document.getElementById('sharebtn');
       if (navigator.share) {{
         b.hidden = false;
-        b.onclick = () => navigator.share({{title: document.title, url: location.href}}).catch(() => {{}});
+        b.onclick = async () => {{
+          // Share the picture itself where the phone allows it (straight to
+          // Pinterest, Photos, a chat...), otherwise share the link.
+          try {{
+            const blob = await (await fetch('{img}')).blob();
+            const file = new File([blob], '{engine.OUTPUT_NAME}', {{type: 'image/jpeg'}});
+            if (navigator.canShare && navigator.canShare({{files: [file]}})) {{
+              await navigator.share({{files: [file]}});
+              return;
+            }}
+          }} catch (e) {{ if (e.name === 'AbortError') return; }}
+          navigator.share({{url: location.href}}).catch(() => {{}});
+        }};
       }}
-    }});
-  </script>"""
-    out = engine.build_html(board_for_render(data), data["source"], nav_html=nav)
-    # Make the board feel like part of the installed app.
-    out = out.replace(
-        "<title>",
-        '<meta name="theme-color" content="#0e0e10"><link rel="manifest" href="/manifest.webmanifest">'
-        '<link rel="apple-touch-icon" href="/static/apple-touch-icon.png"><title>',
-        1,
-    )
-    return out
+    </script>"""
+    return page("Moodboard", body)
+
+
+@app.route(f"/b/<board_id>/{engine.OUTPUT_NAME}")
+def board_image(board_id):
+    load_board(board_id)
+    return send_from_directory(board_dir(board_id), engine.OUTPUT_NAME, max_age=86400)
 
 
 @app.route("/b/<board_id>/download")
 def board_download(board_id):
-    data = load_board(board_id)
-    out = engine.build_html(board_for_render(data), data["source"])
-    slug = re.sub(r"[^a-z0-9]+", "-", data["title"].lower()).strip("-") or "moodboard"
-    return Response(out, mimetype="text/html",
-                    headers={"Content-Disposition": f'attachment; filename="{slug}.html"'})
+    load_board(board_id)
+    return send_from_directory(board_dir(board_id), engine.OUTPUT_NAME, as_attachment=True,
+                               download_name=f"moodboard_scroll_{board_id}.jpg")
 
 
 @app.route("/b/<board_id>/thumb.jpg")
