@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e0e10">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Collage">
+<meta name="description" content="Turn a reel into one tall image of its best shots. Runs on your phone; nothing is uploaded.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Reel Collage</title>
+<style>
+  :root { --bg:#0e0e10; --panel:#18181b; --line:#2a2a2f; --text:#ececef; --muted:#9a9aa3; --accent:#e8e3d9; }
+  * { box-sizing:border-box; }
+  [hidden] { display:none !important; }
+  html { -webkit-text-size-adjust:100%; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif; }
+  .wrap { max-width:640px; margin:0 auto; padding:28px 16px 64px; }
+  h1 { font-size:30px; line-height:1.1; letter-spacing:-.02em; margin:0 0 8px; }
+  p { margin:0 0 12px; }
+  .muted { color:var(--muted); }
+  .err { color:#ff9b8f; white-space:pre-wrap; margin-top:16px; }
+  .pick { display:block; margin-top:22px; padding:22px 18px; border-radius:14px; text-align:center; cursor:pointer;
+    background:var(--accent); color:#111; font-weight:600; font-size:17px; }
+  .pick input { display:none; }
+  .seg { display:flex; gap:6px; margin-top:14px; align-items:center; }
+  .seg span { color:var(--muted); font-size:14px; margin-right:4px; }
+  .seg label { flex:1; }
+  .seg input { position:absolute; opacity:0; }
+  .seg label span { display:block; margin:0; text-align:center; padding:10px 0; border-radius:10px; font-size:14px;
+    border:1px solid var(--line); background:var(--panel); color:var(--text); cursor:pointer; }
+  .seg input:checked + span { background:var(--text); color:#111; border-color:var(--text); }
+  .seg input:focus-visible + span { outline:2px solid var(--accent); outline-offset:2px; }
+  details { margin-top:26px; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px 16px; }
+  summary { cursor:pointer; font-weight:600; }
+  details ol { padding-left:20px; margin:12px 0 0; }
+  details li { margin-bottom:8px; color:#cfcfd6; }
+  .work { margin-top:40px; }
+  .track { height:6px; background:var(--panel); border-radius:99px; overflow:hidden; margin:16px 0 10px; }
+  #bar { height:100%; width:0; background:var(--accent); transition:width .25s ease; }
+  .row { display:flex; gap:8px; margin:0 0 14px; }
+  .row > * { flex:1; }
+  .btn { display:block; text-align:center; text-decoration:none; font:inherit; font-weight:600; font-size:15px;
+    padding:13px 10px; border-radius:12px; border:1px solid var(--line); background:var(--panel); color:var(--text); cursor:pointer; }
+  .btn.main { background:var(--accent); color:#111; border-color:var(--accent); }
+  #result { display:block; width:100%; height:auto; border-radius:12px; }
+  .offscreen { position:fixed; left:0; top:0; width:2px; height:2px; opacity:0; pointer-events:none; }
+  footer { margin-top:28px; font-size:13px; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section id="pick">
+    <h1>Reel Collage</h1>
+    <p class="muted">Turns a reel into one tall image of its best shots: sharp, full-body, eyes open. It all happens on your phone, and nothing gets uploaded.</p>
+
+    <label class="pick">Choose a video
+      <input type="file" id="file" accept="video/*">
+    </label>
+
+    <div class="seg" role="radiogroup" aria-label="Columns">
+      <span>Columns</span>
+      <label><input type="radio" name="cols" value="auto" checked><span>Auto</span></label>
+      <label><input type="radio" name="cols" value="2"><span>2</span></label>
+      <label><input type="radio" name="cols" value="3"><span>3</span></label>
+    </div>
+
+    <p class="err" id="error" role="alert" hidden></p>
+
+    <details>
+      <summary>Getting a reel out of Instagram</summary>
+      <ol>
+        <li>On the reel, tap <strong>Share</strong> (the paper plane). If you see <strong>Download</strong>, tap it. The video lands in your gallery.</li>
+        <li>No Download button? Screen-record the reel instead. iPhone: Control Centre → Screen Recording. Android: Quick Settings → Screen record.</li>
+        <li>Come back here and tap <strong>Choose a video</strong>.</li>
+      </ol>
+      <p class="muted" style="margin:10px 0 0">On Android you can add this page to your home screen (Chrome menu → Add to Home screen). After that, any video in your gallery can be shared straight to <strong>Collage</strong>.</p>
+    </details>
+
+    <footer>The first run downloads about 10 MB of models, which are kept for next time.</footer>
+  </section>
+
+  <section id="work" class="work" hidden>
+    <h1>Working on it</h1>
+    <div class="track"><div id="bar"></div></div>
+    <p class="muted" id="step" aria-live="polite">Starting</p>
+  </section>
+
+  <section id="done" hidden>
+    <div class="row">
+      <a class="btn main" id="save" href="#">Save</a>
+      <button class="btn" id="share" type="button">Share</button>
+      <button class="btn" id="again" type="button">New</button>
+    </div>
+    <img id="result" alt="Collage of the best shots from your video">
+  </section>
+
+</div>
+<script type="module" src="app.js"></script>
+</body>
+</html>

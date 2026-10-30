@@ -1,5 +1,6 @@
 # Render Blueprint for the Moodboard app in moodboard/.
-# Render dashboard -> New -> Blueprint -> pick this repo. It asks for the two secrets below.
+# Render dashboard -> New -> Blueprint -> pick this repo. It asks for an app password.
+# Optional: add ANTHROPIC_API_KEY later under Environment to let Claude pick the shots.
 services:
   - type: web
     name: reel-moodboard
@@ -9,8 +10,6 @@ services:
     dockerContext: ./moodboard
     healthCheckPath: /healthz
     envVars:
-      - key: ANTHROPIC_API_KEY
-        sync: false
       - key: APP_PASSWORD
         sync: false
       - key: SECRET_KEY

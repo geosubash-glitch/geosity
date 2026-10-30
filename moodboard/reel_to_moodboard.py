@@ -1,18 +1,31 @@
 #!/usr/bin/env python3
 # reel_to_moodboard.py
 #
-# Turns a short vertical video (Instagram Reel, TikTok, YouTube Short, or a
-# local MP4) into a self-contained HTML moodboard: sharp keyframes, a colour
-# palette, aesthetic tags and a short vibe description written by Claude.
+# Pulls the hero shots out of a short vertical video (Instagram Reel, TikTok,
+# YouTube Short, or a local file) and stitches them into one tall,
+# Pinterest-style masonry image: moodboard_scroll.jpg. No text, no swatches,
+# just the best full-body / full-item frames.
+#
+# How frames are chosen:
+#   1. PySceneDetect finds the shot cuts. Long single shots are split so a
+#      one-take dance reel still gets several candidates.
+#   2. Within each shot, several frames are sampled and the sharpest one
+#      (highest Laplacian variance) is kept, which throws out motion blur.
+#   3. Claude looks at the candidates, keeps the clean full-body/full-item
+#      reveals and best angles, drops awkward expressions, transitions and
+#      near-duplicates, ranks them, and marks where the subject is.
+#   4. Each hero frame is cropped around the subject, so tile heights vary
+#      naturally, then packed into a 2- or 3-column masonry strip.
 #
 # Install:
-#   pip install anthropic opencv-python scenedetect yt-dlp numpy
+#   pip install anthropic opencv-python scenedetect yt-dlp numpy pillow
 #
 # Run:
 #   export ANTHROPIC_API_KEY=sk-ant-...
 #   python reel_to_moodboard.py path/to/reel.mp4
 #   python reel_to_moodboard.py "https://www.instagram.com/reel/XXXXXXXX/"
-#   python reel_to_moodboard.py clip.mp4 --out boards/ --no-open
+#   python reel_to_moodboard.py clip.mp4 --columns 3 --max-frames 8 --out boards/
+#   python reel_to_moodboard.py clip.mp4 --no-ai      # sharpness only, no API call
 #
 # Notes:
 #   - claude-3-5-sonnet-20241022 has been retired by Anthropic, so the default
@@ -24,7 +37,6 @@
 
 import argparse
 import base64
-import html
 import importlib
 import os
 import re
@@ -35,36 +47,45 @@ import webbrowser
 from pathlib import Path
 
 DEFAULT_MODEL = "claude-sonnet-5-5"
-MAX_CANDIDATES = 8
-MIN_KEEP = 4
-MAX_KEEP = 6
-MAX_SIDE = 1024
-JPEG_QUALITY = 88
-# A frame is treated as blurry when its sharpness is below this share of the
-# sharpest candidate. MIN_KEEP still wins, so short clips never run dry.
+OUTPUT_NAME = "moodboard_scroll.jpg"
+
+MAX_CANDIDATES = 12      # frames shown to Claude
+SAMPLES_PER_SHOT = 5     # frames tried per shot; the sharpest one survives
+MIN_WINDOW_SEC = 0.6     # don't split shots shorter than this
+DEFAULT_MAX_HEROES = 8
+MIN_HEROES = 3
+ANALYSIS_SIDE = 1024     # longest side of frames sent to Claude
+# A candidate counts as blurry when its sharpness is below this share of the
+# sharpest candidate. MIN_HEROES still wins, so short clips never run dry.
 BLUR_RATIO = 0.25
 
-CATEGORIES = [
-    "Fashion Try-On Haul",
-    "Dance Reel",
-    "Thirst Trap",
-    "Fitness",
-    "Lifestyle",
-    "Beauty",
-]
+# Collage look
+GAP = 12                          # px between tiles and around the edge
+BACKGROUND = (14, 14, 16)         # near-black, like a dark Pinterest feed
+CORNER_RADIUS = 14
+COLUMN_WIDTH = {1: 900, 2: 720, 3: 600}   # px; 2 cols -> 1476px wide, 3 cols -> 1848px wide
+# Tile shapes (width / height). Each tile takes one that still holds the
+# whole subject, rotating through them so neighbouring tiles differ in height.
+TILE_ASPECTS = (0.45, 0.5, 0.5625, 0.6667, 0.75, 0.8)
+# Without a subject box (--no-ai), assume the subject is in the middle 70% of
+# the width and only ever trim the sides, never head or feet.
+UNKNOWN_SUBJECT_BOX = (0.15, 0.0, 0.85, 1.0)
+SUBJECT_PADDING = 0.08            # breathing room around the subject, share of its size
+MIN_CROP_SHARE = 0.4              # crops never go below 40% of the frame height
+JPEG_QUALITY = 92
 
 # Models that accept the server-side refusal fallback parameter.
 FALLBACK_MODELS = ("claude-sonnet-5-5", "claude-opus-5-5", "claude-opus-5", "claude-fable-5-1")
 
-HEX_RE = re.compile(r"^#?([0-9a-fA-F]{6})$")
 URL_RE = re.compile(r"^https?://", re.IGNORECASE)
+ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
 
 REQUIRED_MODULES = {
     # import name: pip package
     "cv2": "opencv-python",
     "numpy": "numpy",
     "scenedetect": "scenedetect",
-    "anthropic": "anthropic",
+    "PIL": "pillow",
 }
 
 
@@ -87,10 +108,12 @@ def log(message: str) -> None:
         reporter(message)
 
 
-def check_dependencies(need_ytdlp: bool) -> None:
+def check_dependencies(need_ytdlp: bool, need_anthropic: bool) -> None:
     modules = dict(REQUIRED_MODULES)
     if need_ytdlp:
         modules["yt_dlp"] = "yt-dlp"
+    if need_anthropic:
+        modules["anthropic"] = "anthropic"
     missing = []
     for module, package in modules.items():
         try:
@@ -109,9 +132,6 @@ def check_dependencies(need_ytdlp: bool) -> None:
 # ---------------------------------------------------------------------------
 # 1. Ingestion
 # ---------------------------------------------------------------------------
-
-
-ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
 
 
 def explain_download_error(exc: Exception) -> str:
@@ -133,9 +153,9 @@ def download_video(url: str, workdir: str, cookies_browser: str | None = None, c
 
     log("Downloading the video")
     opts = {
-        # Video-only MP4 first: no audio needed, and it avoids an ffmpeg merge.
-        # 1280px tall is plenty for 1024px frames and keeps downloads small.
-        "format": "bv*[ext=mp4][height<=1280]/b[ext=mp4][height<=1280]/bv*[ext=mp4]/b[ext=mp4]/bv*/b",
+        # Best video-only MP4 first: no audio needed, and it avoids an ffmpeg
+        # merge. The collage is built from these pixels, so take full quality.
+        "format": "bv*[ext=mp4][height<=1920]/b[ext=mp4][height<=1920]/bv*[ext=mp4]/b[ext=mp4]/bv*/b",
         "outtmpl": os.path.join(workdir, "reel.%(ext)s"),
         "noplaylist": True,
         "quiet": True,
@@ -177,49 +197,47 @@ def resolve_source(source: str, workdir: str, cookies_browser: str | None = None
 
 
 # ---------------------------------------------------------------------------
-# 2. Shot detection and frame extraction
+# 2. Shot detection and sharp-frame picking
 # ---------------------------------------------------------------------------
 
 
-def detect_shot_frames(video_path: str, total_frames: int) -> list[int]:
-    """Return one frame index per detected shot (the middle of each shot)."""
+def shot_windows(video_path: str, total_frames: int, fps: float) -> list[tuple[int, int]]:
+    """Frame ranges to pull one candidate from each: detected shots, with long
+    shots split so a single-take video still yields several candidates."""
     from scenedetect import ContentDetector, detect
 
     log("Detecting scene cuts")
     try:
         scenes = detect(video_path, ContentDetector(threshold=27.0))
     except Exception as exc:  # scenedetect raises several backend-specific errors
-        log(f"Scene detection failed ({exc}); falling back to even sampling")
+        log(f"Scene detection failed ({exc}); sampling evenly instead")
         scenes = []
+    def frame_no(tc) -> int:
+        # scenedetect 0.7 renamed get_frames() to the frame_num property.
+        return tc.frame_num if hasattr(tc, "frame_num") else tc.get_frames()
 
-    picks = []
-    for start, end in scenes:
-        s, e = start.get_frames(), end.get_frames()
-        if e > s:
-            picks.append((s + e) // 2)
-    log(f"Found {len(scenes)} shot(s)")
+    windows = [(frame_no(s), frame_no(e)) for s, e in scenes if frame_no(e) > frame_no(s)]
+    if not windows:
+        windows = [(0, total_frames)]
+    log(f"Found {len(scenes) or 1} shot(s)")
 
-    # Single-shot clips (very common for dance reels) give us too few frames,
-    # so top up with evenly spaced samples across the whole clip.
-    if len(picks) < MAX_CANDIDATES and total_frames > 0:
-        needed = MAX_CANDIDATES - len(picks)
-        step = total_frames / (needed + 1)
-        extra = [int(step * (i + 1)) for i in range(needed)]
-        # Skip samples that sit right next to an existing pick.
-        gap = max(1, total_frames // (MAX_CANDIDATES * 2))
-        for idx in extra:
-            if all(abs(idx - p) > gap for p in picks):
-                picks.append(idx)
+    min_len = max(2, int(MIN_WINDOW_SEC * fps))
+    while len(windows) < MAX_CANDIDATES:
+        longest = max(range(len(windows)), key=lambda i: windows[i][1] - windows[i][0])
+        s, e = windows[longest]
+        if e - s < 2 * min_len:
+            break
+        mid = (s + e) // 2
+        windows[longest : longest + 1] = [(s, mid), (mid, e)]
 
-    picks = sorted(set(picks))
-    if len(picks) > MAX_CANDIDATES:
-        # Spread the cap evenly over the shots rather than taking the first N.
-        step = len(picks) / MAX_CANDIDATES
-        picks = [picks[int(i * step)] for i in range(MAX_CANDIDATES)]
-    return picks
+    if len(windows) > MAX_CANDIDATES:
+        # More cuts than we can show: keep the longest shots (they're the ones
+        # that hold a pose), then put them back in timeline order.
+        windows = sorted(sorted(windows, key=lambda w: w[1] - w[0], reverse=True)[:MAX_CANDIDATES])
+    return windows
 
 
-def resize_to_max_side(frame, max_side: int = MAX_SIDE):
+def resize_to_max_side(frame, max_side: int):
     import cv2
 
     h, w = frame.shape[:2]
@@ -231,9 +249,10 @@ def resize_to_max_side(frame, max_side: int = MAX_SIDE):
 
 
 def sharpness(frame) -> float:
+    """Laplacian variance, measured at a fixed size so every frame is judged alike."""
     import cv2
 
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(resize_to_max_side(frame, 720), cv2.COLOR_BGR2GRAY)
     return float(cv2.Laplacian(gray, cv2.CV_64F).var())
 
 
@@ -242,152 +261,145 @@ def extract_candidates(video_path: str) -> list[dict]:
 
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
-        fail(f"OpenCV could not open the video (unsupported codec or corrupt file): {video_path}")
+        fail("OpenCV could not open the video (unsupported codec or corrupt file).")
     total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
     fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
     if total <= 0:
         cap.release()
         fail("The video reports zero frames. Is it a valid video file?")
 
-    indices = detect_shot_frames(video_path, total)
+    windows = shot_windows(video_path, total, fps)
+    log("Hunting for the sharpest frame in each shot")
     candidates = []
-    for idx in indices:
-        cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
-        ok, frame = cap.read()
-        if not ok or frame is None:
-            continue
-        frame = resize_to_max_side(frame)
-        candidates.append({"frame_index": idx, "time": idx / fps, "image": frame, "sharpness": sharpness(frame)})
+    for start, end in windows:
+        # Sample the middle 70% of the shot: the edges are where cuts,
+        # wipes and whip-pans live.
+        lo = start + (end - start) * 0.15
+        hi = start + (end - start) * 0.85
+        count = min(SAMPLES_PER_SHOT, max(1, end - start))
+        picks = sorted({int(lo + (hi - lo) * (i + 0.5) / count) for i in range(count)})
+        best = None
+        for idx in picks:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, min(idx, total - 1))
+            ok, frame = cap.read()
+            if not ok or frame is None:
+                continue
+            score = sharpness(frame)
+            if best is None or score > best["sharpness"]:
+                best = {"frame_index": idx, "time": idx / fps, "image": frame, "sharpness": score}
+        if best:
+            candidates.append(best)
     cap.release()
 
     if not candidates:
         fail("Could not read any frames from the video.")
-    log(f"Extracted {len(candidates)} candidate frame(s)")
+    log(f"Kept {len(candidates)} candidate frame(s)")
     return candidates
 
 
-def keep_sharpest(candidates: list[dict]) -> list[dict]:
+def drop_blurry(candidates: list[dict]) -> list[dict]:
     ranked = sorted(candidates, key=lambda c: c["sharpness"], reverse=True)
     best = ranked[0]["sharpness"] or 1.0
-    kept = [c for c in ranked[:MAX_KEEP] if c["sharpness"] >= best * BLUR_RATIO]
-    if len(kept) < MIN_KEEP:
-        kept = ranked[: min(MIN_KEEP, len(ranked))]
-    dropped = len(candidates) - len(kept)
-    log(f"Kept {len(kept)} sharp frame(s), dropped {dropped} blurry/extra")
-    # Back to timeline order so the model reads the clip in sequence.
+    kept = [c for c in ranked if c["sharpness"] >= best * BLUR_RATIO]
+    if len(kept) < MIN_HEROES:
+        kept = ranked[: min(MIN_HEROES, len(ranked))]
+    if len(kept) < len(candidates):
+        log(f"Dropped {len(candidates) - len(kept)} blurry frame(s)")
+    # Back to timeline order so Claude reads the clip in sequence.
     return sorted(kept, key=lambda c: c["frame_index"])
 
 
-def encode_jpeg_b64(frame) -> str:
+def encode_jpeg_b64(frame, quality: int = 88) -> str:
     import cv2
 
-    ok, buf = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), JPEG_QUALITY])
+    ok, buf = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), quality])
     if not ok:
         fail("JPEG encoding failed.")
     return base64.b64encode(buf.tobytes()).decode("ascii")
 
 
 # ---------------------------------------------------------------------------
-# 3. Claude vision analysis
+# 3. Hero selection (Claude vision, or sharpness alone with --no-ai)
 # ---------------------------------------------------------------------------
 
-MOODBOARD_TOOL = {
-    "name": "generate_moodboard",
-    "description": (
-        "Record the moodboard for a short-form video. Call this exactly once, "
-        "after looking at every frame."
-    ),
+HERO_TOOL = {
+    "name": "select_hero_frames",
+    "description": "Record the hero frames chosen for the collage, best first. Call this exactly once.",
     "strict": True,
     "input_schema": {
         "type": "object",
         "additionalProperties": False,
-        "required": [
-            "title",
-            "primary_category",
-            "sub_style",
-            "selected_frame_indices",
-            "color_palette",
-            "tags",
-            "vibe_description",
-        ],
+        "required": ["hero_frames"],
         "properties": {
-            "title": {
-                "type": "string",
-                "description": "A short, evocative board title, 2-5 words.",
-            },
-            "primary_category": {"type": "string", "enum": CATEGORIES},
-            "sub_style": {
-                "type": "string",
-                "description": (
-                    "Specific style / demographic vibe, e.g. 'Desi Traditional / Festal', "
-                    "'Blonde / Boho Chic', 'Y2K Streetwear', 'Minimalist Gym', 'Athleisure'."
-                ),
-            },
-            "selected_frame_indices": {
+            "hero_frames": {
                 "type": "array",
-                "items": {"type": "integer"},
-                "description": "3 or 4 frame numbers showing the cleanest, most representative poses or outfits.",
-            },
-            "color_palette": {
-                "type": "array",
-                "description": "Exactly 4 dominant colours, most prominent first.",
+                "description": "Chosen frames, best first.",
                 "items": {
                     "type": "object",
                     "additionalProperties": False,
-                    "required": ["hex", "name"],
+                    "required": ["frame", "subject_box"],
                     "properties": {
-                        "hex": {"type": "string", "description": "Colour as #RRGGBB."},
-                        "name": {"type": "string", "description": "Short colour name, e.g. 'Marigold'."},
+                        "frame": {"type": "integer", "description": "Frame number as labelled."},
+                        "subject_box": {
+                            "type": "array",
+                            "items": {"type": "integer"},
+                            "description": (
+                                "[x_min, y_min, x_max, y_max] on a 0-1000 scale of the frame's width and height, "
+                                "tightly around the whole person head to toe (hair, hands and shoes included) "
+                                "or around the whole featured item."
+                            ),
+                        },
                     },
                 },
-            },
-            "tags": {
-                "type": "array",
-                "items": {"type": "string"},
-                "description": "Exactly 5 short aesthetic keywords.",
-            },
-            "vibe_description": {
-                "type": "string",
-                "description": "Exactly two sentences describing the overall vibe.",
-            },
+            }
         },
     },
 }
 
-SYSTEM_PROMPT = """You are a fashion and social-media trend analyst building moodboards from short-form video.
+SYSTEM_PROMPT = """You are a fashion photo editor pulling hero shots out of a short-form video for a visual moodboard.
 
-You will see numbered keyframes from one Reel / TikTok / Short. Study all of them, then call the generate_moodboard tool once. Do not answer in plain text.
+You will see numbered frames from one Reel / TikTok / Short. Pick the frames worth printing and call the select_hero_frames tool once. Do not answer in plain text.
 
-Guidance:
-- primary_category: choose the single best fit from the allowed list.
-- sub_style: be specific about the aesthetic and cultural styling you can see (garments, fabrics, jewellery, setting, grooming). Avoid vague labels like "casual" or "trendy".
-- selected_frame_indices: pick 3 or 4 frame numbers that are in focus, well framed, and together show the range of looks or poses. Prefer distinct outfits or poses over near-duplicates.
-- color_palette: 4 colours that actually dominate the clothing, styling and set, not generic black/white unless they truly dominate.
-- tags: 5 lowercase aesthetic keywords.
-- vibe_description: two plain sentences a stylist would write. Describe what is visible; do not guess anyone's identity."""
+Keep frames that:
+- show the full outfit or the full item clearly: try-on reveals, full-body poses, the best angle of a look;
+- are crisp, with the subject in focus;
+- catch a natural, composed expression and a deliberate pose.
+
+Drop frames that have:
+- motion blur, or a subject caught mid-movement;
+- eyes mid-blink, a mouth mid-word, or an awkward, unflattering expression;
+- transitions: wipes, fades, whip pans, cover cards, text-heavy frames;
+- the subject cut off at the head or feet, or blocked by hands, phone or objects;
+- the same outfit and pose as a better frame you already chose.
+
+Order the frames best first. Aim for {target} frames; return fewer only if the clip doesn't have that many good ones, and never more than {max_heroes}.
+
+For each frame, give subject_box around the person (head to toe) or the featured item, on a 0-1000 scale. The collage is cropped from this box, so include the whole subject and nothing you'd want cut."""
 
 
-def analyse_frames(frames: list[dict], model: str) -> dict:
+def ask_claude_for_heroes(frames: list[dict], model: str, max_heroes: int) -> list[dict]:
     import anthropic
 
     content = []
     for i, f in enumerate(frames):
+        small = resize_to_max_side(f["image"], ANALYSIS_SIDE)
         content.append({"type": "text", "text": f"Frame {i} (t={f['time']:.1f}s)"})
         content.append(
-            {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": f["b64"]}}
+            {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": encode_jpeg_b64(small)}}
         )
     content.append(
         {
             "type": "text",
-            "text": f"Frame numbers run 0 to {len(frames) - 1}. Build the moodboard with the generate_moodboard tool.",
+            "text": f"Frame numbers run 0 to {len(frames) - 1}. Choose the hero frames with the select_hero_frames tool.",
         }
     )
 
+    target = min(max_heroes, max(MIN_HEROES, len(frames) // 2 + 1))
     request = dict(
         model=model,
         max_tokens=16000,
-        system=SYSTEM_PROMPT,
-        tools=[MOODBOARD_TOOL],
+        system=SYSTEM_PROMPT.format(target=target, max_heroes=max_heroes),
+        tools=[HERO_TOOL],
         # Current models reject forced tool_choice; the strict schema plus the
         # prompt keeps the output on the tool, and we verify below.
         tool_choice={"type": "auto"},
@@ -395,7 +407,7 @@ def analyse_frames(frames: list[dict], model: str) -> dict:
     )
 
     client = anthropic.Anthropic()
-    log(f"Sending {len(frames)} frame(s) to {model}")
+    log("Asking Claude to pick the hero shots")
     try:
         if model.startswith(FALLBACK_MODELS):
             # On a safety-classifier decline, let the API re-run the request on
@@ -419,272 +431,228 @@ def analyse_frames(frames: list[dict], model: str) -> dict:
     if response.stop_reason == "refusal":
         fail("The model declined to analyse this video.")
     for block in response.content:
-        if block.type == "tool_use" and block.name == "generate_moodboard":
-            return dict(block.input)
+        if block.type == "tool_use" and block.name == "select_hero_frames":
+            return clean_selection(block.input.get("hero_frames") or [], frames, max_heroes)
     if response.stop_reason == "max_tokens":
-        fail("The model ran out of output tokens before finishing the moodboard.")
-    fail("The model answered without calling generate_moodboard. Try running again.")
+        fail("The model ran out of output tokens before choosing frames.")
+    fail("The model answered without choosing frames. Try running again.")
 
 
-# ---------------------------------------------------------------------------
-# Result clean-up (the schema is strict, but counts and hex formats aren't)
-# ---------------------------------------------------------------------------
+def clean_selection(picks: list, frames: list[dict], max_heroes: int) -> list[dict]:
+    """Validate Claude's picks: real frame numbers, no repeats, sane boxes."""
+    heroes, seen = [], set()
+    for p in picks:
+        idx = p.get("frame") if isinstance(p, dict) else None
+        if not isinstance(idx, int) or not 0 <= idx < len(frames) or idx in seen:
+            continue
+        seen.add(idx)
+        box = normalise_box(p.get("subject_box"))
+        heroes.append({**frames[idx], "box": box or UNKNOWN_SUBJECT_BOX, "box_known": box is not None})
+        if len(heroes) == max_heroes:
+            break
+    if not heroes:
+        log("Claude didn't return usable frames; falling back to the sharpest ones")
+        return pick_by_sharpness(frames, max_heroes)
+    log(f"Claude picked {len(heroes)} hero frame(s)")
+    return heroes
 
 
-def dominant_colours(frames: list[dict], k: int = 4) -> list[str]:
-    """K-means palette from the frames, used only if the model's colours are unusable."""
+def normalise_box(box) -> tuple[float, float, float, float] | None:
+    """0-1000 ints -> 0-1 floats, or None if the box is unusable."""
+    if not isinstance(box, list) or len(box) != 4 or not all(isinstance(v, (int, float)) for v in box):
+        return None
+    x0, y0, x1, y1 = (min(max(v / 1000.0, 0.0), 1.0) for v in box)
+    x0, x1 = sorted((x0, x1))
+    y0, y1 = sorted((y0, y1))
+    if x1 - x0 < 0.05 or y1 - y0 < 0.05:
+        return None
+    return (x0, y0, x1, y1)
+
+
+def pick_by_sharpness(frames: list[dict], max_heroes: int) -> list[dict]:
+    """No-AI selection: sharpest first, skipping frames that look like a repeat."""
     import cv2
     import numpy as np
 
-    pixels = []
-    for f in frames:
-        small = cv2.resize(f["image"], (64, 64), interpolation=cv2.INTER_AREA)
-        pixels.append(small.reshape(-1, 3))
-    data = np.float32(np.vstack(pixels))
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 20, 1.0)
-    _, labels, centers = cv2.kmeans(data, k, None, criteria, 3, cv2.KMEANS_PP_CENTERS)
-    counts = np.bincount(labels.flatten(), minlength=k)
-    order = np.argsort(-counts)
+    def thumb(img):
+        return cv2.resize(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY), (32, 56), interpolation=cv2.INTER_AREA).astype(np.float32)
+
+    heroes, thumbs = [], []
+    for f in sorted(frames, key=lambda c: c["sharpness"], reverse=True):
+        t = thumb(f["image"])
+        if any(float(np.mean(np.abs(t - other))) < 6.0 for other in thumbs):
+            continue
+        heroes.append({**f, "box": UNKNOWN_SUBJECT_BOX, "box_known": False})
+        thumbs.append(t)
+        if len(heroes) == max_heroes:
+            break
+    log(f"Picked {len(heroes)} frame(s) by sharpness")
+    return heroes
+
+
+# ---------------------------------------------------------------------------
+# 4. Subject-aware cropping and masonry layout (Pillow)
+# ---------------------------------------------------------------------------
+
+
+def padded_subject(hero: dict) -> tuple[int, int, int, int, int, int]:
+    """Subject box in pixels with breathing room, plus frame size: (x0, y0, x1, y1, W, H)."""
+    H, W = hero["image"].shape[:2]
+    bx0, by0, bx1, by1 = hero["box"]
+    bw, bh = (bx1 - bx0) * W, (by1 - by0) * H
+    cx, cy = (bx0 + bx1) / 2 * W, (by0 + by1) / 2 * H
+    if hero.get("box_known", True):
+        bw *= 1 + 2 * SUBJECT_PADDING
+        bh *= 1 + 2 * SUBJECT_PADDING
+    # Keep enough pixels that tiles never turn soft from upscaling.
+    bh = max(bh, MIN_CROP_SHARE * H)
+    bw = min(bw, W)
+    bh = min(bh, H)
+    x0 = min(max(cx - bw / 2, 0), W - bw)
+    y0 = min(max(cy - bh / 2, 0), H - bh)
+    return int(x0), int(y0), int(x0 + bw), int(y0 + bh), W, H
+
+
+def aspect_range(hero: dict) -> tuple[float, float]:
+    """Narrowest and widest tile shapes that still hold the whole subject."""
+    x0, y0, x1, y1, W, H = padded_subject(hero)
+    return (x1 - x0) / H, W / (y1 - y0)
+
+
+def crop_for_aspect(hero: dict, aspect: float) -> tuple[int, int, int, int]:
+    """Smallest crop of the given width/height ratio that contains the padded subject."""
+    x0, y0, x1, y1, W, H = padded_subject(hero)
+    lo, hi = aspect_range(hero)
+    aspect = min(max(aspect, lo), hi)
+    bw, bh = x1 - x0, y1 - y0
+    ch = max(bh, bw / aspect)
+    cw = ch * aspect
+    cw, ch = min(cw, W), min(ch, H)
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    left = min(max(cx - cw / 2, 0), W - cw)
+    top = min(max(cy - ch / 2, 0), H - ch)
+    return int(round(left)), int(round(top)), int(round(left + cw)), int(round(top + ch))
+
+
+def tile_aspect(hero: dict, order: int) -> float:
+    """Tile shape for the order-th tile: one of the standard shapes that holds
+    the whole subject, rotating so neighbouring tiles get different heights.
+    A head-to-toe pose only allows tall shapes; a close-up allows squarer ones."""
+    lo, hi = aspect_range(hero)
+    fits = [a for a in TILE_ASPECTS if lo <= a <= hi]
+    if not fits:
+        # The subject doesn't fit any standard shape; use the closest one it allows.
+        return min(max(TILE_ASPECTS[0], lo), hi)
+    # Stay among the three tallest that fit: they suit poses and keep the strip vertical.
+    fits = fits[:3]
+    return fits[(order * 2) % len(fits)] if len(fits) == 3 else fits[order % len(fits)]
+
+
+def plan_layout(heroes: list[dict], columns: int) -> list[list[dict]]:
+    """Masonry plan. Each tile has a natural height (from its rotated shape) and a
+    range it can stretch or shrink to while still holding the whole subject.
+    Every way of dealing tiles into columns is tried (at most 3^7 for 8 tiles);
+    the winner lets all columns end at the same height, keeps the best-ranked
+    shots near the top, and reshapes tiles the least."""
+    import itertools
+
+    col_w = COLUMN_WIDTH[columns]
+    tiles = []
+    for order, hero in enumerate(heroes):
+        lo, hi = aspect_range(hero)
+        h_min, h_max = col_w / min(hi, 1.25), col_w / max(lo, 0.4)
+        h = min(max(round(col_w / tile_aspect(hero, order)), h_min), h_max)
+        tiles.append({"hero": hero, "h": h, "h_min": h_min, "h_max": h_max})
+
+    n = len(tiles)
+    best = None
+    # The best shot always starts the first column; columns are otherwise interchangeable.
+    for rest in itertools.product(range(columns), repeat=n - 1):
+        assign = (0, *rest)
+        cols = [[i for i in range(n) if assign[i] == c] for c in range(columns)]
+        if any(not c for c in cols):
+            continue
+        lows = [sum(tiles[i]["h_min"] + GAP for i in c) for c in cols]
+        highs = [sum(tiles[i]["h_max"] + GAP for i in c) for c in cols]
+        noms = [sum(tiles[i]["h"] + GAP for i in c) for c in cols]
+        low_t, high_t = max(lows), min(highs)
+        target = min(max(sum(noms) / columns, low_t), max(high_t, low_t))
+        cost = (
+            round(max(0, low_t - high_t)),
+            sum((n - i) * row for c in cols for row, i in enumerate(c)),
+            sum(abs(v - target) for v in noms),
+        )
+        if best is None or cost < best[0]:
+            best = (cost, cols, target)
+
+    _, picked, target = best
     out = []
-    for i in order:
-        b, g, r = (int(v) for v in centers[i])
-        out.append(f"#{r:02X}{g:02X}{b:02X}")
+    for col in picked:
+        col_tiles = [dict(tiles[i]) for i in col]
+        delta = target - sum(t["h"] + GAP for t in col_tiles)
+        for tile in reversed(col_tiles):
+            if abs(delta) < 1:
+                break
+            new_h = min(max(tile["h"] + delta, tile["h_min"]), tile["h_max"])
+            delta -= new_h - tile["h"]
+            tile["h"] = new_h
+        for tile in col_tiles:
+            tile["h"] = round(tile["h"])
+            tile["aspect"] = col_w / tile["h"]
+        out.append(col_tiles)
     return out
 
 
-def clean_result(raw: dict, frames: list[dict]) -> dict:
-    n = len(frames)
+def rounded_mask(size: tuple[int, int], radius: int):
+    from PIL import Image, ImageDraw
 
-    indices = []
-    for i in raw.get("selected_frame_indices") or []:
-        if isinstance(i, int) and 0 <= i < n and i not in indices:
-            indices.append(i)
-    indices = indices[:4]
-    if len(indices) < min(3, n):
-        by_sharpness = sorted(range(n), key=lambda j: frames[j]["sharpness"], reverse=True)
-        for j in by_sharpness:
-            if j not in indices:
-                indices.append(j)
-            if len(indices) >= min(3, n):
-                break
+    # Draw at 4x and shrink for smooth corners.
+    big = Image.new("L", (size[0] * 4, size[1] * 4), 0)
+    ImageDraw.Draw(big).rounded_rectangle((0, 0, big.width - 1, big.height - 1), radius=radius * 4, fill=255)
+    return big.resize(size, Image.LANCZOS)
 
-    palette = []
-    for c in raw.get("color_palette") or []:
-        m = HEX_RE.match(str(c.get("hex", "")).strip())
-        if m:
-            palette.append({"hex": "#" + m.group(1).upper(), "name": str(c.get("name", "")).strip()})
-    palette = palette[:4]
-    if len(palette) < 4:
-        have = {p["hex"] for p in palette}
-        for hx in dominant_colours(frames):
-            if len(palette) >= 4:
-                break
-            if hx not in have:
-                palette.append({"hex": hx, "name": ""})
 
-    tags = [str(t).strip().lstrip("#") for t in raw.get("tags") or [] if str(t).strip()][:5]
+def render_collage(heroes: list[dict], columns: int):
+    import cv2
+    from PIL import Image
 
-    category = raw.get("primary_category")
-    if category not in CATEGORIES:
-        category = "Lifestyle"
+    cols = plan_layout(heroes, columns)
+    col_w = COLUMN_WIDTH[columns]
+    width = columns * col_w + (columns + 1) * GAP
+    height = max(sum(t["h"] + GAP for t in col) for col in cols) + GAP
+    canvas = Image.new("RGB", (width, height), BACKGROUND)
 
-    return {
-        "title": str(raw.get("title") or "Untitled Moodboard").strip(),
-        "primary_category": category,
-        "sub_style": str(raw.get("sub_style") or "").strip(),
-        "selected": [frames[i] for i in indices],
-        "palette": palette,
-        "tags": tags,
-        "vibe": str(raw.get("vibe_description") or "").strip(),
-    }
+    for c, col in enumerate(cols):
+        x, y = GAP + c * (col_w + GAP), GAP
+        for tile in col:
+            l, t, r, b = crop_for_aspect(tile["hero"], tile["aspect"])
+            rgb = cv2.cvtColor(tile["hero"]["image"][t:b, l:r], cv2.COLOR_BGR2RGB)
+            img = Image.fromarray(rgb).resize((col_w, tile["h"]), Image.LANCZOS)
+            canvas.paste(img, (x, y), rounded_mask(img.size, CORNER_RADIUS))
+            y += tile["h"] + GAP
+    return canvas
+
+
+def choose_columns(count: int) -> int:
+    return 2 if count <= 5 else 3
 
 
 # ---------------------------------------------------------------------------
-# 4. HTML moodboard
+# Pipeline
 # ---------------------------------------------------------------------------
-
-
-def text_colour_for(hex_colour: str) -> str:
-    r, g, b = (int(hex_colour[i : i + 2], 16) for i in (1, 3, 5))
-    luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
-    return "#111111" if luminance > 150 else "#F5F5F5"
-
-
-PAGE_TEMPLATE = """<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{title}</title>
-<style>
-  :root {{
-    --bg: #0e0e10;
-    --panel: #18181b;
-    --line: #2a2a2f;
-    --text: #ececef;
-    --muted: #9a9aa3;
-    --accent: {accent};
-  }}
-  * {{ box-sizing: border-box; }}
-  body {{
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
-  }}
-  .wrap {{ max-width: 1180px; margin: 0 auto; padding: 40px 20px 64px; }}
-  header {{ border-bottom: 1px solid var(--line); padding-bottom: 24px; margin-bottom: 28px; }}
-  h1 {{ font-size: clamp(28px, 5vw, 44px); line-height: 1.1; margin: 0 0 14px; letter-spacing: -0.02em; }}
-  .badges {{ display: flex; flex-wrap: wrap; gap: 8px; }}
-  .badge {{
-    font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
-    padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted);
-  }}
-  .badge.primary {{ background: var(--accent); border-color: var(--accent); color: {accent_text}; }}
-  .layout {{ display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 28px; align-items: start; }}
-  @media (max-width: 860px) {{ .layout {{ grid-template-columns: 1fr; }} }}
-  .grid {{ column-count: 2; column-gap: 14px; }}
-  @media (min-width: 1100px) {{ .grid {{ column-count: 3; }} }}
-  @media (max-width: 520px) {{ .grid {{ column-gap: 10px; }} .tile {{ margin-bottom: 10px; border-radius: 10px; }} }}
-  .tile {{
-    break-inside: avoid; margin: 0 0 14px; border-radius: 14px; overflow: hidden;
-    background: var(--panel); position: relative;
-  }}
-  .tile img {{ display: block; width: 100%; height: auto; transition: transform .35s ease; cursor: zoom-in; }}
-  @media (hover: hover) {{ .tile:hover img {{ transform: scale(1.03); }} }}
-  .tile span {{
-    position: absolute; left: 10px; bottom: 10px; font-size: 11px; padding: 3px 8px;
-    border-radius: 6px; background: rgba(0,0,0,.55); color: #fff;
-  }}
-  aside section {{ background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin-bottom: 16px; }}
-  aside h2 {{ font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 12px; }}
-  .swatches {{ display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }}
-  .swatch {{
-    border-radius: 10px; height: 84px; padding: 10px; display: flex; flex-direction: column;
-    justify-content: flex-end; cursor: pointer; border: 1px solid rgba(255,255,255,.06);
-    font: 600 13px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace;
-  }}
-  .swatch small {{ font-size: 12px; font-weight: 400; opacity: .8; }}
-  .tags {{ display: flex; flex-wrap: wrap; gap: 8px; }}
-  .tag {{ font-size: 13px; padding: 5px 10px; border-radius: 8px; background: #232328; color: var(--text); }}
-  .vibe {{ margin: 0; color: #cfcfd6; }}
-  .lightbox {{
-    position: fixed; inset: 0; background: rgba(0,0,0,.88); display: none;
-    align-items: center; justify-content: center; padding: 24px; z-index: 10; cursor: zoom-out;
-  }}
-  .lightbox.open {{ display: flex; }}
-  .lightbox img {{ max-width: 100%; max-height: 100%; border-radius: 12px; }}
-  .toast {{
-    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #fff; color: #111;
-    padding: 8px 14px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none;
-  }}
-  .toast.show {{ opacity: 1; }}
-  footer {{ margin-top: 32px; color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }}
-  footer a {{ color: var(--muted); }}
-  .nav {{ display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }}
-  .nav a, .nav button {{
-    font-family: inherit; font-size: 13px; font-weight: 600; line-height: 1; color: var(--text); background: var(--panel);
-    border: 1px solid var(--line); border-radius: 999px; padding: 9px 14px; text-decoration: none; cursor: pointer;
-  }}
-  .nav .grow {{ flex: 1; }}
-</style>
-</head>
-<body>
-<div class="wrap">
-{nav}
-  <header>
-    <h1>{title}</h1>
-    <div class="badges">
-      <span class="badge primary">{category}</span>
-      {sub_style_badge}
-    </div>
-  </header>
-  <div class="layout">
-    <main class="grid">
-{tiles}
-    </main>
-    <aside>
-      <section>
-        <h2>Palette</h2>
-        <div class="swatches">
-{swatches}
-        </div>
-      </section>
-      <section>
-        <h2>Tags</h2>
-        <div class="tags">{tags}</div>
-      </section>
-      <section>
-        <h2>Vibe</h2>
-        <p class="vibe">{vibe}</p>
-      </section>
-    </aside>
-  </div>
-  <footer>Made from {source}</footer>
-</div>
-<div class="lightbox" id="lightbox"><img alt=""></div>
-<div class="toast" id="toast"></div>
-<script>
-  const box = document.getElementById('lightbox');
-  document.querySelectorAll('.tile img').forEach(img => {{
-    img.addEventListener('click', () => {{ box.querySelector('img').src = img.src; box.classList.add('open'); }});
-  }});
-  box.addEventListener('click', () => box.classList.remove('open'));
-  document.addEventListener('keydown', e => {{ if (e.key === 'Escape') box.classList.remove('open'); }});
-  const toast = document.getElementById('toast');
-  document.querySelectorAll('.swatch').forEach(s => {{
-    s.addEventListener('click', () => {{
-      const hex = s.dataset.hex;
-      const done = () => {{ toast.textContent = hex + ' copied'; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 1200); }};
-      if (navigator.clipboard) navigator.clipboard.writeText(hex).then(done, done); else done();
-    }});
-  }});
-</script>
-</body>
-</html>
-"""
-
-
-def build_html(board: dict, source: str, nav_html: str = "") -> str:
-    """Render the moodboard page. nav_html is trusted markup the web app adds on top."""
-    esc = html.escape
-    tiles = "\n".join(
-        f'      <figure class="tile"><img src="data:image/jpeg;base64,{f["b64"]}" '
-        f'alt="Frame at {f["time"]:.1f}s"><span>{f["time"]:.1f}s</span></figure>'
-        for f in board["selected"]
-    )
-    swatches = "\n".join(
-        f'          <div class="swatch" data-hex="{p["hex"]}" title="Click to copy" '
-        f'style="background:{p["hex"]};color:{text_colour_for(p["hex"])}">'
-        f'{esc(p["name"]) + "<br>" if p["name"] else ""}<small>{p["hex"]}</small></div>'
-        for p in board["palette"]
-    )
-    tags = "".join(f'<span class="tag">#{esc(t)}</span>' for t in board["tags"])
-    sub_style_badge = f'<span class="badge">{esc(board["sub_style"])}</span>' if board["sub_style"] else ""
-    accent = board["palette"][0]["hex"]
-    return PAGE_TEMPLATE.format(
-        title=esc(board["title"]),
-        accent=accent,
-        accent_text=text_colour_for(accent),
-        category=esc(board["primary_category"]),
-        sub_style_badge=sub_style_badge,
-        tiles=tiles,
-        swatches=swatches,
-        tags=tags,
-        vibe=esc(board["vibe"]),
-        source=f'<a href="{esc(source)}">{esc(source)}</a>' if URL_RE.match(source) else esc(source),
-        nav=nav_html,
-    )
 
 
 def create_moodboard(
     source: str,
     model: str = DEFAULT_MODEL,
+    use_ai: bool = True,
+    max_heroes: int = DEFAULT_MAX_HEROES,
+    columns: int | None = None,
     cookies_browser: str | None = None,
     cookie_file: str | None = None,
     progress=None,
-) -> dict:
-    """Run the whole pipeline. Returns the cleaned board dict (frames include "b64").
+):
+    """Run the whole pipeline and return the collage as a PIL image.
 
     progress, if given, is called with short status strings as work proceeds.
     Raises MoodboardError for anything the user should see.
@@ -695,18 +663,21 @@ def create_moodboard(
             video_path = resolve_source(source, workdir, cookies_browser, cookie_file)
             candidates = extract_candidates(video_path)
 
-        log("Picking the sharpest frames")
-        frames = keep_sharpest(candidates)
-        for f in frames:
-            f["b64"] = encode_jpeg_b64(f["image"])
+        frames = drop_blurry(candidates)
+        if use_ai:
+            heroes = ask_claude_for_heroes(frames, model, max_heroes)
+        else:
+            heroes = pick_by_sharpness(frames, max_heroes)
 
-        log("Asking Claude to read the look")
-        raw = analyse_frames(frames, model)
-        board = clean_result(raw, frames)
-        log("Building the board")
-        return board
+        cols = min(columns or choose_columns(len(heroes)), len(heroes))
+        log(f"Stitching {len(heroes)} frame(s) into {cols} columns")
+        return render_collage(heroes, cols)
     finally:
         _progress.reporter = None
+
+
+def save_jpeg(image, path) -> None:
+    image.save(path, "JPEG", quality=JPEG_QUALITY, subsampling=0, optimize=True, progressive=True)
 
 
 # ---------------------------------------------------------------------------
@@ -715,32 +686,44 @@ def create_moodboard(
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Turn a short video Reel into an HTML moodboard.")
+    p = argparse.ArgumentParser(description="Turn a short video into a Pinterest-style hero-shot collage.")
     p.add_argument("source", help="Local video path or a Reel / TikTok / YouTube Short URL")
-    p.add_argument("--out", default=".", help="Directory for moodboard.html (default: current directory)")
+    p.add_argument("--out", default=".", help=f"Directory for {OUTPUT_NAME} (default: current directory)")
     p.add_argument("--model", default=DEFAULT_MODEL, help=f"Claude model ID (default: {DEFAULT_MODEL})")
+    p.add_argument("--no-ai", action="store_true", help="Pick frames by sharpness alone; no API call")
+    p.add_argument("--max-frames", type=int, default=DEFAULT_MAX_HEROES, help=f"Most hero frames to use (default: {DEFAULT_MAX_HEROES})")
+    p.add_argument("--columns", type=int, choices=(2, 3), help="Masonry columns (default: 2 for up to 5 frames, else 3)")
     p.add_argument("--cookies-from-browser", metavar="BROWSER", help="Pass browser cookies to yt-dlp (chrome, firefox, ...)")
     p.add_argument("--cookies", metavar="FILE", help="Netscape-format cookies.txt for yt-dlp")
-    p.add_argument("--no-open", action="store_true", help="Don't open the moodboard in a browser")
-    return p.parse_args()
+    p.add_argument("--no-open", action="store_true", help="Don't open the collage when done")
+    args = p.parse_args()
+    if args.max_frames < 1:
+        p.error("--max-frames must be at least 1")
+    return args
 
 
 def main() -> None:
     args = parse_args()
-    check_dependencies(need_ytdlp=bool(URL_RE.match(args.source)))
+    check_dependencies(need_ytdlp=bool(URL_RE.match(args.source)), need_anthropic=not args.no_ai)
 
-    if not (os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN")):
+    if not args.no_ai and not (os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN")):
         log("ANTHROPIC_API_KEY is not set; relying on any saved Anthropic login profile")
 
     out_dir = Path(args.out).expanduser()
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / "moodboard.html"
+    out_path = out_dir / OUTPUT_NAME
 
-    board = create_moodboard(args.source, args.model, args.cookies_from_browser, args.cookies)
-
-    out_path.write_text(build_html(board, args.source), encoding="utf-8")
-    log(f"{board['primary_category']} / {board['sub_style']}")
-    log(f"Moodboard written to {out_path.resolve()}")
+    collage = create_moodboard(
+        args.source,
+        model=args.model,
+        use_ai=not args.no_ai,
+        max_heroes=args.max_frames,
+        columns=args.columns,
+        cookies_browser=args.cookies_from_browser,
+        cookie_file=args.cookies,
+    )
+    save_jpeg(collage, out_path)
+    log(f"Collage written to {out_path.resolve()} ({collage.width}x{collage.height})")
 
     if not args.no_open:
         webbrowser.open(out_path.resolve().as_uri())
