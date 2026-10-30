@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Reel Collage",
-  "short_name": "Collage",
-  "description": "Turn a reel into one tall image of its best shots.",
+  "name": "Moodboard",
+  "short_name": "Moodboard",
+  "description": "A moodboard that grows with every reel you add.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
