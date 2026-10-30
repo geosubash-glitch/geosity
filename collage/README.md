@@ -1,6 +1,10 @@
-# Reel Collage
+# Moodboard (Reel Collage)
 
-Turns a short video into one tall Pinterest-style image of its best shots (`moodboard_scroll.jpg`). It's free, runs entirely in the phone's browser, and uploads nothing.
+A moodboard that grows with every reel you add. Each reel contributes its best shots, the board is saved on the phone between visits, and **Save as image** exports it as one tall Pinterest-style picture (`moodboard_scroll.jpg`). Very big boards are split across a few images, because phones can't draw one endless picture. It's free, runs entirely in the phone's browser, and uploads nothing.
+
+- **Add several reels at once.** On Android, after adding the page to the home screen, you can share one or more videos straight from the gallery.
+- **Newest reel first** on the board. Tap a shot to remove it. A reel that's already on the board gets skipped.
+- **Storage:** the board lives in the browser's own storage (IndexedDB) on that phone. On iPhone, add the page to the Home Screen, or Safari may clear it if the page isn't opened for a while.
 
 **Use it:** <https://geosubash-glitch.github.io/geosity/collage/>
 
@@ -13,7 +17,8 @@ Turns a short video into one tall Pinterest-style image of its best shots (`mood
    - FaceMesh for eyes and mouth: eyes open, mouth not caught mid-word?
    - An expression model: no grimace?
 4. Drops repeats and keeps the best 3–8 shots.
-5. Crops each shot around the person so head and feet stay in. It varies the tile heights and packs them into 2–3 columns with 12px dark gaps, picking the arrangement that lets the columns end level.
+5. Saves the chosen frames with the box around the person.
+6. On export, crops each shot around the person so head and feet stay in. It varies the tile heights and packs them into 2–3 columns with 12px dark gaps, picking the arrangement that lets the columns end level.
 
 ## Files
 

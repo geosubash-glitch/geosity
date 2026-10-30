@@ -1,13 +1,13 @@
 // Reel Collage service worker.
 // - Keeps the page, the vision library and its models on the phone after the
 //   first visit, so later runs start fast and work offline.
-// - Receives videos shared from the Android gallery (Web Share Target) and
-//   hands them to the page.
+// - Receives videos shared from the Android gallery (Web Share Target), one
+//   or several at a time, and hands them to the page.
 // Cache names all start with "reel-collage-" so this never touches the rest of
 // the site's caches. Another worker on this site may clear ours; everything
 // here re-downloads on demand, so that only costs a refetch.
 
-const CACHE = 'reel-collage-v1';
+const CACHE = 'reel-collage-v2';
 const SHARE_CACHE = 'reel-collage-share';
 const SHELL = ['./', './index.html', './app.js', './manifest.webmanifest', './icon-192.png', './apple-touch-icon.png'];
 
@@ -27,12 +27,15 @@ async function receiveShare(request) {
   const scope = self.registration.scope;
   try {
     const form = await request.formData();
-    const file = form.get('video');
-    if (file && typeof file !== 'string' && file.size > 0) {
+    const files = form.getAll('video').filter((f) => f && typeof f !== 'string' && f.size > 0);
+    if (files.length) {
       const cache = await caches.open(SHARE_CACHE);
-      await cache.put('shared-video', new Response(file, {
-        headers: { 'content-type': file.type || 'video/mp4', 'x-name': encodeURIComponent(file.name || 'video') },
-      }));
+      const batch = Date.now();
+      for (let i = 0; i < files.length; i++) {
+        await cache.put(`shared-video-${batch}-${i}`, new Response(files[i], {
+          headers: { 'content-type': files[i].type || 'video/mp4', 'x-name': encodeURIComponent(files[i].name || 'video') },
+        }));
+      }
       return Response.redirect(new URL('./?shared=1', scope).href, 303);
     }
   } catch (err) {

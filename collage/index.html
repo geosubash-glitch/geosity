@@ -6,12 +6,12 @@
 <meta name="theme-color" content="#0e0e10">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Collage">
-<meta name="description" content="Turn a reel into one tall image of its best shots. Runs on your phone; nothing is uploaded.">
+<meta name="apple-mobile-web-app-title" content="Moodboard">
+<meta name="description" content="A moodboard that grows with every reel you add. Runs on your phone; nothing is uploaded.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>Reel Collage</title>
+<title>Moodboard</title>
 <style>
   :root { --bg:#0e0e10; --panel:#18181b; --line:#2a2a2f; --text:#ececef; --muted:#9a9aa3; --accent:#e8e3d9; }
   * { box-sizing:border-box; }
@@ -19,88 +19,128 @@
   html { -webkit-text-size-adjust:100%; }
   body { margin:0; background:var(--bg); color:var(--text);
     font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif; }
-  .wrap { max-width:640px; margin:0 auto; padding:28px 16px 64px; }
-  h1 { font-size:30px; line-height:1.1; letter-spacing:-.02em; margin:0 0 8px; }
+  .wrap { max-width:960px; margin:0 auto; padding:24px 12px 64px; }
+  header { padding:0 4px; }
+  h1 { font-size:30px; line-height:1.1; letter-spacing:-.02em; margin:0 0 4px; }
   p { margin:0 0 12px; }
   .muted { color:var(--muted); }
-  .err { color:#ff9b8f; white-space:pre-wrap; margin-top:16px; }
-  .pick { display:block; margin-top:22px; padding:22px 18px; border-radius:14px; text-align:center; cursor:pointer;
+  #count { color:var(--muted); font-size:14px; min-height:21px; margin:0; }
+  .add { display:block; margin:16px 4px 0; padding:18px; border-radius:14px; text-align:center; cursor:pointer;
     background:var(--accent); color:#111; font-weight:600; font-size:17px; }
-  .pick input { display:none; }
-  .seg { display:flex; gap:6px; margin-top:14px; align-items:center; }
-  .seg span { color:var(--muted); font-size:14px; margin-right:4px; }
-  .seg label { flex:1; }
+  .add.disabled { opacity:.5; pointer-events:none; }
+  .add input { display:none; }
+  .note { margin:12px 4px 0; padding:12px 14px; border-radius:12px; background:var(--panel); border:1px solid var(--line);
+    white-space:pre-wrap; font-size:14px; }
+  .note.err { color:#ff9b8f; }
+  .work { margin:12px 4px 0; padding:14px; border-radius:12px; background:var(--panel); border:1px solid var(--line); }
+  .track { height:6px; background:#26262b; border-radius:99px; overflow:hidden; margin:0 0 8px; }
+  #bar { height:100%; width:0; background:var(--accent); transition:width .25s ease; }
+  #step { margin:0; font-size:14px; color:var(--muted); }
+  .tools { display:flex; gap:8px; align-items:center; margin:16px 4px 12px; flex-wrap:wrap; }
+  .seg { display:flex; gap:4px; align-items:center; }
+  .seg > span { color:var(--muted); font-size:13px; margin-right:2px; }
   .seg input { position:absolute; opacity:0; }
-  .seg label span { display:block; margin:0; text-align:center; padding:10px 0; border-radius:10px; font-size:14px;
+  .seg label span { display:block; padding:7px 11px; border-radius:9px; font-size:13px;
     border:1px solid var(--line); background:var(--panel); color:var(--text); cursor:pointer; }
   .seg input:checked + span { background:var(--text); color:#111; border-color:var(--text); }
   .seg input:focus-visible + span { outline:2px solid var(--accent); outline-offset:2px; }
-  details { margin-top:26px; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px 16px; }
-  summary { cursor:pointer; font-weight:600; }
-  details ol { padding-left:20px; margin:12px 0 0; }
-  details li { margin-bottom:8px; color:#cfcfd6; }
-  .work { margin-top:40px; }
-  .track { height:6px; background:var(--panel); border-radius:99px; overflow:hidden; margin:16px 0 10px; }
-  #bar { height:100%; width:0; background:var(--accent); transition:width .25s ease; }
-  .row { display:flex; gap:8px; margin:0 0 14px; }
-  .row > * { flex:1; }
-  .btn { display:block; text-align:center; text-decoration:none; font:inherit; font-weight:600; font-size:15px;
-    padding:13px 10px; border-radius:12px; border:1px solid var(--line); background:var(--panel); color:var(--text); cursor:pointer; }
+  .grow { flex:1; }
+  .btn { display:inline-block; text-align:center; text-decoration:none; font:inherit; font-weight:600; font-size:14px;
+    padding:10px 14px; border-radius:11px; border:1px solid var(--line); background:var(--panel); color:var(--text); cursor:pointer; }
   .btn.main { background:var(--accent); color:#111; border-color:var(--accent); }
-  #result { display:block; width:100%; height:auto; border-radius:12px; }
+  .btn:disabled { opacity:.6; }
+  /* Pinterest-style board: CSS columns, tiles keep their own heights */
+  #board { column-count:2; column-gap:10px; padding:0 2px; }
+  @media (min-width:700px) { #board { column-count:3; column-gap:12px; } }
+  .tile { display:block; width:100%; margin:0 0 10px; padding:0; border:0; border-radius:12px; overflow:hidden;
+    position:relative; background:var(--panel); break-inside:avoid; cursor:pointer; }
+  .tile img { position:absolute; display:block; max-width:none; }
+  .empty { margin:28px 4px 0; padding:18px; border-radius:14px; background:var(--panel); border:1px solid var(--line); }
+  .empty h2 { font-size:17px; margin:0 0 8px; }
+  .empty ol { padding-left:20px; margin:0; }
+  .empty li { margin-bottom:8px; color:#cfcfd6; }
+  .hint { margin:16px 4px 0; font-size:13px; color:var(--muted); }
+  footer { margin:28px 4px 0; display:flex; gap:12px; align-items:center; flex-wrap:wrap; font-size:13px; color:var(--muted); }
+  footer button { background:none; border:0; color:var(--muted); text-decoration:underline; font:inherit; cursor:pointer; padding:0; }
+  .export { margin:0 4px 20px; }
+  .export .btn { margin-bottom:10px; }
+  .export img { display:block; width:100%; height:auto; border-radius:12px; }
+  .lightbox { position:fixed; inset:0; background:rgba(0,0,0,.9); display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:14px; padding:20px; z-index:10; }
+  .lightbox img { max-width:100%; max-height:calc(100% - 70px); border-radius:12px; object-fit:contain; }
+  .lightbox .row { display:flex; gap:10px; }
   .offscreen { position:fixed; left:0; top:0; width:2px; height:2px; opacity:0; pointer-events:none; }
-  footer { margin-top:28px; font-size:13px; color:var(--muted); }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <section id="pick">
-    <h1>Reel Collage</h1>
-    <p class="muted">Turns a reel into one tall image of its best shots: sharp, full-body, eyes open. It all happens on your phone, and nothing gets uploaded.</p>
+  <section id="boardView">
+    <header>
+      <h1>Moodboard</h1>
+      <p id="count"></p>
+    </header>
 
-    <label class="pick">Choose a video
-      <input type="file" id="file" accept="video/*">
+    <label class="add" id="addBtn">Add reels
+      <input type="file" id="file" accept="video/*" multiple>
     </label>
 
-    <div class="seg" role="radiogroup" aria-label="Columns">
-      <span>Columns</span>
-      <label><input type="radio" name="cols" value="auto" checked><span>Auto</span></label>
-      <label><input type="radio" name="cols" value="2"><span>2</span></label>
-      <label><input type="radio" name="cols" value="3"><span>3</span></label>
+    <div class="work" id="work" hidden>
+      <div class="track"><div id="bar"></div></div>
+      <p id="step" aria-live="polite">Starting</p>
     </div>
 
-    <p class="err" id="error" role="alert" hidden></p>
+    <p class="note" id="notice" role="status" hidden></p>
 
-    <details>
-      <summary>Getting a reel out of Instagram</summary>
+    <div class="empty" id="empty" hidden>
+      <h2>Your board is empty</h2>
       <ol>
-        <li>On the reel, tap <strong>Share</strong> (the paper plane). If you see <strong>Download</strong>, tap it. The video lands in your gallery.</li>
-        <li>No Download button? Screen-record the reel instead. iPhone: Control Centre → Screen Recording. Android: Quick Settings → Screen record.</li>
-        <li>Come back here and tap <strong>Choose a video</strong>.</li>
+        <li>In Instagram, tap <strong>Share</strong> on a reel. If you see <strong>Download</strong>, tap it. No Download button? Screen-record the reel instead.</li>
+        <li>Tap <strong>Add reels</strong> and pick one or more videos. Each one adds its best shots: sharp, full-body, eyes open.</li>
+        <li>Keep adding new reels whenever you like. The board is saved on this phone and grows each time.</li>
       </ol>
-      <p class="muted" style="margin:10px 0 0">On Android you can add this page to your home screen (Chrome menu → Add to Home screen). After that, any video in your gallery can be shared straight to <strong>Collage</strong>.</p>
-    </details>
-
-    <footer>The first run downloads about 10 MB of models, which are kept for next time.</footer>
-  </section>
-
-  <section id="work" class="work" hidden>
-    <h1>Working on it</h1>
-    <div class="track"><div id="bar"></div></div>
-    <p class="muted" id="step" aria-live="polite">Starting</p>
-  </section>
-
-  <section id="done" hidden>
-    <div class="row">
-      <a class="btn main" id="save" href="#">Save</a>
-      <button class="btn" id="share" type="button">Share</button>
-      <button class="btn" id="again" type="button">New</button>
     </div>
-    <img id="result" alt="Collage of the best shots from your video">
+
+    <div class="tools" id="boardTools" hidden>
+      <div class="seg" role="radiogroup" aria-label="Columns">
+        <span>Columns</span>
+        <label><input type="radio" name="cols" value="auto" checked><span>Auto</span></label>
+        <label><input type="radio" name="cols" value="2"><span>2</span></label>
+        <label><input type="radio" name="cols" value="3"><span>3</span></label>
+      </div>
+      <span class="grow"></span>
+      <button class="btn main" id="export" type="button">Save as image</button>
+    </div>
+
+    <div id="board"></div>
+
+    <p class="hint" id="iosHint" hidden>On iPhone, add this page to your Home Screen (Share → Add to Home Screen). Otherwise Safari may clear your board if you don't open it for a while.</p>
+
+    <footer>
+      <span>Saved on this phone only. Tap a shot to remove it.</span>
+      <button type="button" id="clear">Clear board</button>
+    </footer>
+  </section>
+
+  <section id="exportView" hidden>
+    <div class="tools">
+      <button class="btn" id="closeExport" type="button">← Board</button>
+      <span class="grow"></span>
+      <button class="btn main" id="shareAll" type="button" hidden>Share</button>
+    </div>
+    <div id="exports"></div>
   </section>
 
 </div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <img id="lbImg" alt="Shot">
+  <div class="row">
+    <button class="btn" id="lbClose" type="button">Close</button>
+    <button class="btn" id="lbRemove" type="button">Remove from board</button>
+  </div>
+</div>
+
 <script type="module" src="app.js"></script>
 </body>
 </html>
