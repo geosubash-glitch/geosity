@@ -1,0 +1,67 @@
+** Drc report for trekbuddy_main.kicad_pcb **
+** Created on 2026-11-06 01:57:42 **
+
+** Found 19 DRC violations **
+[lib_footprint_issues]: The current configuration does not include the library 'MountingHole'.
+    Local override; Severity: warning
+    @(133.8700 mm, 102.6700 mm): Footprint H1
+[lib_footprint_issues]: The current configuration does not include the library 'MountingHole'.
+    Local override; Severity: warning
+    @(118.8700 mm, 158.4400 mm): Footprint H2
+[lib_footprint_issues]: The current configuration does not include the library 'TrekBuddy'.
+    Local override; Severity: warning
+    @(116.0000 mm, 114.0500 mm): Footprint U1
+[lib_footprint_issues]: The current configuration does not include the library 'TrekBuddy'.
+    Local override; Severity: warning
+    @(132.1000 mm, 116.5000 mm): Footprint U2
+[lib_footprint_issues]: The current configuration does not include the library 'TrekBuddy'.
+    Local override; Severity: warning
+    @(130.5000 mm, 105.7000 mm): Footprint J3
+[lib_footprint_issues]: The current configuration does not include the library 'TrekBuddy'.
+    Local override; Severity: warning
+    @(115.7500 mm, 134.5000 mm): Footprint U3
+[lib_footprint_issues]: The current configuration does not include the library 'TrekBuddy'.
+    Local override; Severity: warning
+    @(130.5000 mm, 131.0000 mm): Footprint BZ1
+[lib_footprint_issues]: The current configuration does not include the library 'TrekBuddy'.
+    Local override; Severity: warning
+    @(119.5000 mm, 145.5000 mm): Footprint U6
+[lib_footprint_issues]: The current configuration does not include the library 'TrekBuddy'.
+    Local override; Severity: warning
+    @(119.5000 mm, 149.2500 mm): Footprint L2
+[lib_footprint_issues]: The current configuration does not include the library 'TrekBuddy'.
+    Local override; Severity: warning
+    @(140.3500 mm, 129.0000 mm): Footprint SW1
+[lib_footprint_issues]: The current configuration does not include the library 'TrekBuddy'.
+    Local override; Severity: warning
+    @(140.3500 mm, 136.0000 mm): Footprint SW2
+[lib_footprint_issues]: The current configuration does not include the library 'TrekBuddy'.
+    Local override; Severity: warning
+    @(129.5000 mm, 139.0000 mm): Footprint J1
+[lib_footprint_issues]: The current configuration does not include the library 'TrekBuddy'.
+    Local override; Severity: warning
+    @(114.2500 mm, 145.5000 mm): Footprint U7
+[lib_footprint_issues]: The current configuration does not include the library 'TrekBuddy'.
+    Local override; Severity: warning
+    @(115.7500 mm, 150.3250 mm): Footprint MK1
+[lib_footprint_issues]: The current configuration does not include the library 'TrekBuddy'.
+    Local override; Severity: warning
+    @(129.0000 mm, 147.0000 mm): Footprint U4
+[lib_footprint_issues]: The current configuration does not include the library 'TrekBuddy'.
+    Local override; Severity: warning
+    @(135.0000 mm, 147.0000 mm): Footprint L1
+[lib_footprint_issues]: The current configuration does not include the library 'TrekBuddy'.
+    Local override; Severity: warning
+    @(140.0000 mm, 147.0000 mm): Footprint U5
+[lib_footprint_issues]: The current configuration does not include the library 'TrekBuddy'.
+    Local override; Severity: warning
+    @(147.0000 mm, 149.7500 mm): Footprint J2
+[lib_footprint_issues]: The current configuration does not include the library 'TrekBuddy'.
+    Local override; Severity: warning
+    @(125.5000 mm, 158.2500 mm): Footprint J4
+
+** Found 0 unconnected pads **
+
+** Found 0 Footprint errors **
+
+** End of Report **
