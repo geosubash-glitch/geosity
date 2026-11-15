@@ -4,16 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Kondapalli · Little toys. Big stories.</title>
-<meta name="description" content="Meet the maker behind your Kondapalli toy.">
+<meta name="description" content="Read the story of your Kondapalli book and meet the artisan who made its figures.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Kondapalli · Little toys. Big stories.">
 <meta property="og:description" content="Read the story of your book and meet the artisan behind its figures.">
 <meta property="og:url" content="https://geosubash-glitch.github.io/geosity/kondapalli/">
 <meta name="twitter:card" content="summary">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Nunito:wght@700;800&family=Noto+Sans+Telugu:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preload" href="fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/nunito-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
+<meta name="theme-color" content="#fffaec">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23275c47'/%3E%3Ctext x='32' y='45' font-size='36' font-weight='800' text-anchor='middle' fill='%23fffaec' font-family='sans-serif'%3EK%3C/text%3E%3C/svg%3E">
 <style>
+@font-face{font-family:'Inter';font-weight:400;font-display:swap;src:url(fonts/inter-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-weight:500;font-display:swap;src:url(fonts/inter-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-weight:600;font-display:swap;src:url(fonts/inter-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Nunito';font-weight:700;font-display:swap;src:url(fonts/nunito-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Nunito';font-weight:800;font-display:swap;src:url(fonts/nunito-latin-800-normal.woff2) format('woff2')}
+@font-face{font-family:'Noto Sans Telugu';font-weight:400;font-display:swap;src:url(fonts/noto-sans-telugu-telugu-400-normal.woff2) format('woff2');unicode-range:U+0C00-0C7F,U+0951-0952,U+0964-0965,U+1CDA,U+200C-200D,U+25CC}
+@font-face{font-family:'Noto Sans Telugu';font-weight:500;font-display:swap;src:url(fonts/noto-sans-telugu-telugu-500-normal.woff2) format('woff2');unicode-range:U+0C00-0C7F,U+0951-0952,U+0964-0965,U+1CDA,U+200C-200D,U+25CC}
 :root{
   --green:#275c47; --ink:#293f38; --muted:#596b62;
   --cream:#fffaec; --sage:#eef3ea; --line:#e7e9df; --chip:#eef0e6;
@@ -114,9 +122,35 @@ footer a{color:var(--green)}
 .from{display:block;margin-top:8px;font-size:15px;color:var(--green);font-weight:500;text-decoration:none}
 .sub{font-size:23px;margin-top:32px}
 .grid.three{grid-template-columns:1fr 1fr}
+
+a,button{-webkit-tap-highlight-color:transparent}
+img{height:auto;max-width:100%}
+.madeby img{height:76px}
+.madeby small{color:var(--muted)}
+a:focus-visible,button:focus-visible{outline:3px solid #275c47;outline-offset:3px;border-radius:10px}
+h1:focus{outline:none}
+.skip{position:absolute;left:-999px;top:8px;background:var(--green);color:#fff;padding:10px 14px;border-radius:10px;z-index:9}
+.skip:focus{left:12px}
+nav a{min-height:44px;display:flex;align-items:center;justify-content:center}
+.lang{position:sticky;top:0;z-index:5;box-shadow:0 0 0 8px var(--cream)}
+.lang button{min-height:44px}
+.back{display:inline-flex;align-items:center;gap:6px;padding:12px 0 4px;margin-top:6px}
+.ic{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.card .ic,.madeby .ic{color:var(--green);width:22px;height:22px;margin-left:auto}
+.card .meta{gap:6px}
+.card:hover,.bookcard:hover,.madeby:hover{border-color:#cfd6c8}
+ol.story{list-style:none}
+.notfound{padding:40px 0 20px}
+.notfound h1{font-size:30px}
+.notfound p{margin-top:10px;font-size:16px;line-height:1.5}
+.notfound .btn{margin-top:22px;text-decoration:none}
+a.btn{text-decoration:none}
+@media(prefers-reduced-motion:reduce){.view.on{animation:none}.card:active{transform:none}}
+footer{padding-bottom:calc(26px + env(safe-area-inset-bottom))}
 </style>
 </head>
 <body>
+<a class="skip" href="#root">Skip to content</a>
 <div class="app">
 <header>
   <div class="brand">Kondapalli</div>
@@ -126,52 +160,76 @@ footer a{color:var(--green)}
     <a href="#/craft" id="n-craft">About Us</a>
   </nav>
 </header>
-<main id="root"></main>
-<footer>Sample page for the Kondapalli storybook. Details are filled in with each artisan’s consent.</footer>
+<main id="root"><noscript><p style="padding:30px 0;font-size:16px;line-height:1.5">This page needs JavaScript to show your book’s story. Please turn it on and reload.</p></noscript></main>
+<footer>A student design project at NID Andhra Pradesh. Artisan details are shared with their consent.</footer>
 </div>
-<script src="data.js"></script>
+<script src="data.js?v=3"></script>
 <script>
 (function(){
-  var D=DATA, root=document.getElementById('root'), lang='both';
-  var $=function(h){return h};
-  function toyCard(id){var t=D.toys[id];return '<a class="card" href="#/toy/'+id+'"><img src="'+t.img+'" alt="'+t.name+', a Kondapalli toy"><div class="meta"><div><b>'+t.name+'</b><small>Meet its maker</small></div><i>↗</i></div></a>';}
-  function bookCard(id){var b=D.books[id];return '<a class="bookcard" href="#/book/'+id+'"><img src="'+b.cover+'" alt="Cover of '+b.title+'"><div><b>'+b.title+'</b><small>'+b.toys.length+' figures · 8 spreads</small></div></a>';}
-  function craft(){return '<section id="craft"><span class="chip">OUR ROOTS</span><h1>Small toys,<br>a beautiful tradition.</h1><p class="where">Made in Kondapalli, Andhra Pradesh</p><p class="intro">In a village near Vijayawada, artisans turn lightweight wood into colorful characters. These handmade toys carry stories of animals, village life and Indian traditions.</p><div class="panel"><h2>From wood to wonder</h2><div class="step"><em>01</em><div><b>Carved with care</b><span>Shaped by hand from soft Tella Poniki wood.</span></div></div><div class="step"><em>02</em><div><b>Brought to life in color</b><span>Assembled and painted by skilled artisans.</span></div></div><div class="step"><em>03</em><div><b>Made for stories</b><span>Each character invites a little imagination.</span></div></div></div><div class="together"><h3>A little together-time</h3><p>Ask your child: “What adventure will your animal go on today?” Explore its story together.</p></div><p class="foot">A living craft. A story worth sharing.</p></section>';}
-  function home(){return '<h1 style="font-size:36px;line-height:1.12;margin-top:26px">Which book do you have?</h1><p class="lead" style="font-size:16.5px;line-height:1.5;margin-top:12px">Pick your book to read its story and meet the maker of its figures.</p>'+Object.keys(D.books).map(bookCard).join('')+'<p class="more" style="margin-top:28px"> </p>';}
-  function book(id){var b=D.books[id]; if(!b) return home();
-    var others=Object.keys(D.books).filter(function(k){return k!==id});
-    return '<h1 style="font-size:32px;line-height:1.15;margin-top:24px">'+b.title+'</h1><img class="cover" src="'+b.cover+'" alt="Cover of '+b.title+'">'
-    +(b.line?'<div class="lesson"><b>The lesson</b><p>'+b.line+'</p></div>':'')
-    +'<h2 class="sub">Meet the figures</h2><p style="font-size:15px;margin-top:6px">The characters that come with this book. Tap one to see who made it.</p><div class="grid">'+b.toys.map(toyCard).join('')+'</div>'
-    +'<h2 class="sub">Read the story</h2><div class="lang" id="lang"><button data-l="both">Both</button><button data-l="en">English</button><button data-l="te">తెలుగు</button></div><div id="sp"></div>'
-    +'<h2 class="sub">Also in this set</h2>'+others.map(bookCard).join('')+'<p class="foot">A living craft. A story worth sharing.</p>';}
-  function spreads(id){var b=D.books[id];return b.spreads.map(function(s,i){return '<div class="sp"><em>'+(i+1)+'</em><div>'+(lang!=='te'?'<p>'+s[0]+'</p>':'')+(lang!=='en'?'<p class="'+(lang==='both'?'te':'')+'">'+s[1]+'</p>':'')+'</div></div>';}).join('');}
-  function toy(id){var t=D.toys[id]; if(!t) return home(); var a=D.artisans[t.artisan], b=D.books[t.book];
-    var mates=b.toys.filter(function(k){return k!==id});
-    return '<a class="back" href="#/book/'+t.book+'">← Back to the book</a><img class="big" src="'+t.img+'" alt="'+t.name+', a Kondapalli toy"><h1 style="font-size:34px;margin-top:16px">'+t.name+'</h1><a class="from" href="#/book/'+t.book+'">From '+b.title+'</a>'
-    +'<h2 class="sub">Made by</h2><a class="madeby" href="#/artisan/'+t.artisan+'"><img src="'+a.photo+'" alt="'+a.name+'"><div><b>'+a.name+'</b><small>'+a.role+'</small></div><i>→</i></a>'
-    +'<div class="panel" style="margin-top:26px"><h2>From wood to wonder</h2><div class="step"><em>01</em><div><b>Carved with care</b><span>Shaped by hand from soft Tella Poniki wood.</span></div></div><div class="step"><em>02</em><div><b>Brought to life in color</b><span>Assembled and painted by skilled artisans.</span></div></div></div>'
-    +'<h2 class="sub">Also in this book</h2><div class="grid">'+mates.map(toyCard).join('')+'</div><p class="foot">A living craft. A story worth sharing.</p>';}
-  function artisan(id){var a=D.artisans[id]; if(!a) return home();
-    var made=Object.keys(D.toys).filter(function(k){return D.toys[k].artisan===id});
-    return '<a class="back" href="javascript:history.back()">← Back</a><img class="portrait" src="'+a.photo+'" alt="'+a.name+', artisan, in his shop"><h1 style="margin-top:18px">'+a.name+'</h1><div class="role">'+a.role+'</div><h2>A little about '+a.name.split(' ')[0]+'</h2><p class="bio">'+a.bio+'</p>'
-    +'<h2 class="sub">Figures made by '+a.name.split(' ')[0]+'</h2><div class="grid">'+made.map(toyCard).join('')+'</div>'
-    +'<button class="btn fill" data-note="n1">Request a commission</button><div class="note" id="n1">Commission requests open once the artisan has given his consent.</div><button class="btn line" data-note="n2">View contact number</button><div class="note" id="n2">Contact number to be added with the artisan’s consent.</div><p class="foot">A living craft. A story worth sharing.</p>';}
+  var D=DATA, root=document.getElementById('root'), lang='both', trail=[], scrolls={}, first=true;
+  try{lang=localStorage.getItem('kp_lang')||'both'}catch(e){}
+  var has=function(o,k){return Object.prototype.hasOwnProperty.call(o,k)};
+  var esc=function(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+  var ARROW='<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+  var LEFT='<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
+  var STEPS='<div class="step"><em>01</em><div><b>Carved with care</b><span>Shaped by hand from soft Tella Poniki wood.</span></div></div><div class="step"><em>02</em><div><b>Brought to life in color</b><span>Assembled and painted by skilled artisans.</span></div></div>';
+  var FOOT='<p class="foot">A living craft. A story worth sharing.</p>';
+  function toyCard(id,sub){var t=D.toys[id];return '<a class="card" href="#/toy/'+id+'"><img src="'+t.img+'" alt="" width="423" height="321" loading="lazy"><div class="meta"><div><b>'+esc(t.name)+'</b><small>'+esc(sub)+'</small></div>'+ARROW+'</div></a>';}
+  function bookCard(id){var b=D.books[id];return '<a class="bookcard" href="#/book/'+id+'"><img src="'+b.cover+'" alt="" width="900" height="651"><div><b>'+esc(b.title)+'</b><small>'+b.toys.length+' figures · '+b.spreads.length+' spreads</small></div></a>';}
+  function craft(){return '<section id="craft"><h1>Small toys,<br>a beautiful tradition.</h1><p class="where">Made in Kondapalli, Andhra Pradesh</p><p class="intro">In a village near Vijayawada, artisans turn lightweight wood into colorful characters. These handmade toys carry stories of animals, village life and Indian traditions.</p><div class="panel"><h2>From wood to wonder</h2>'+STEPS+'<div class="step"><em>03</em><div><b>Made for stories</b><span>Each character invites a little imagination.</span></div></div></div><div class="together"><h3>A little together-time</h3><p>Ask your child: “What adventure will your animal go on today?” Explore its story together.</p></div>'+FOOT+'</section>';}
+  function home(){return '<h1 style="font-size:36px;line-height:1.12;margin-top:26px">Which book do you have?</h1><p class="lead" style="font-size:16.5px;line-height:1.5;margin-top:12px">Pick your book to read its story and meet the maker of its figures.</p>'+Object.keys(D.books).map(bookCard).join('')+'<p class="more">&nbsp;</p>';}
+  function book(id){var b=D.books[id], others=Object.keys(D.books).filter(function(k){return k!==id});
+    return '<h1 style="font-size:32px;line-height:1.15;margin-top:24px">'+esc(b.title)+'</h1><img class="cover" src="'+b.cover+'" alt="Cover of '+esc(b.title)+'" width="900" height="651">'
+    +(b.line?'<div class="lesson"><b>The lesson</b><p>'+esc(b.line)+'</p></div>':'')
+    +'<h2 class="sub">Meet the figures</h2><p style="font-size:15px;margin-top:6px">The characters that come with this book. Tap one to see who made it.</p><div class="grid">'+b.toys.map(function(k){return toyCard(k,'Meet its maker')}).join('')+'</div>'
+    +'<h2 class="sub">Read the story</h2><div class="lang" id="lang" role="group" aria-label="Story language"><button data-l="both">Both</button><button data-l="en">English</button><button data-l="te" lang="te">తెలుగు</button></div><ol class="story" id="sp"></ol>'
+    +(others.length?'<h2 class="sub">'+(others.length>1?'More books':'Another book')+'</h2>'+others.map(bookCard).join(''):'')+FOOT;}
+  function spreads(id){return D.books[id].spreads.map(function(s,i){return '<li class="sp"><em aria-hidden="true">'+(i+1)+'</em><div>'+(lang!=='te'?'<p lang="en">'+esc(s[0])+'</p>':'')+(lang!=='en'?'<p lang="te" class="'+(lang==='both'?'te':'')+'">'+esc(s[1])+'</p>':'')+'</div></li>';}).join('');}
+  function toy(id){var t=D.toys[id], a=D.artisans[t.artisan], b=D.books[t.book], mates=b?b.toys.filter(function(k){return k!==id}):[];
+    return (b?'<a class="back" href="#/book/'+t.book+'" data-back>'+LEFT+'Back to the book</a>':'<a class="back" href="#/">'+LEFT+'Back</a>')+'<img class="big" src="'+t.img+'" alt="'+esc(t.name)+', a Kondapalli wooden toy" width="423" height="321"><h1 style="font-size:34px;margin-top:16px">'+esc(t.name)+'</h1>'+(b?'<a class="from" href="#/book/'+t.book+'">From '+esc(b.title)+'</a>':'')
+    +(a?'<h2 class="sub">Made by</h2><a class="madeby" href="#/artisan/'+t.artisan+'"><img src="'+a.photo+'" alt="" width="76" height="76"><div><b>'+esc(a.name)+'</b><small>'+esc(a.role)+'</small></div>'+ARROW+'</a>':'')
+    +'<div class="panel" style="margin-top:26px"><h2>From wood to wonder</h2>'+STEPS+'</div>'
+    +(mates.length?'<h2 class="sub">Also in this book</h2><div class="grid">'+mates.map(function(k){return toyCard(k,'See this figure')}).join('')+'</div>':'')+FOOT;}
+  function artisan(id){var a=D.artisans[id], first=esc(a.name.split(' ')[0]), made=Object.keys(D.toys).filter(function(k){return D.toys[k].artisan===id});
+    var contact=a.phone?'<a class="btn line" href="tel:'+esc(a.phone)+'">Call '+first+'</a>':'<button class="btn line" data-note="n2" aria-expanded="false" aria-controls="n2">View contact number</button><div class="note" id="n2" role="status">Contact number to be added with the artisan’s consent.</div>';
+    var commission=a.whatsapp?'<a class="btn fill" href="https://wa.me/'+esc(a.whatsapp)+'">Request a commission</a>':'<button class="btn fill" data-note="n1" aria-expanded="false" aria-controls="n1">Request a commission</button><div class="note" id="n1" role="status">Commission requests open once the artisan has given consent.</div>';
+    return '<a class="back" href="#/" data-back>'+LEFT+'Back</a><img class="portrait" src="'+a.photo+'" alt="Portrait of '+esc(a.name)+'" width="968" height="692"><h1 style="margin-top:18px">'+esc(a.name)+'</h1><div class="role">'+esc(a.role)+'</div><h2>A little about '+first+'</h2><p class="bio">'+esc(a.bio)+'</p>'
+    +(made.length?'<h2 class="sub">Figures made by '+first+'</h2><div class="grid">'+made.map(function(k){var bk=D.books[D.toys[k].book];return toyCard(k,bk?bk.short:'')}).join('')+'</div>':'')
+    +commission+contact+FOOT;}
+  function notFound(){return '<div class="notfound"><h1>We could not find that page</h1><p>The link may be old or mistyped. Your book’s story and its makers are one tap away.</p><a class="btn fill" href="#/">See the books</a></div>';}
+  function parse(){var h=location.hash.replace(/^#\/?/,''),q=h.indexOf('?');if(q>-1)h=h.slice(0,q);
+    var p=h.split('/').filter(Boolean).map(function(x){try{return decodeURIComponent(x).toLowerCase()}catch(e){return x.toLowerCase()}});return {r:p[0]||'',id:p[1]||''};}
   function render(){
-    var p=(location.hash||'#/').slice(2).split('/'), r=p[0]||'', id=p[1], html;
-    if(r==='craft')html=craft(); else if(r==='book')html=book(id); else if(r==='toy')html=toy(id); else if(r==='artisan')html=artisan(id); else html=home();
-    root.innerHTML='<section class="view on" id="'+(r||'home')+'">'+html+'</section>';
+    var cur=location.hash||'#/', prev=trail[trail.length-1];
+    if(!first&&prev!==undefined) scrolls[prev]=window.scrollY;
+    var goingBack=trail.length>1&&trail[trail.length-2]===cur;
+    if(goingBack)trail.pop(); else if(prev!==cur)trail.push(cur);
+    var R=parse(), r=R.r, id=R.id, html, title='Kondapalli · Little toys. Big stories.', section=r||'home';
+    try{
+      if(r==='')html=home();
+      else if(r==='craft'){html=craft();title='About Us · Kondapalli';}
+      else if(r==='book'&&has(D.books,id)){html=book(id);title=D.books[id].title+' · Kondapalli';}
+      else if(r==='toy'&&has(D.toys,id)){html=toy(id);title=D.toys[id].name+' · Kondapalli';}
+      else if(r==='artisan'&&has(D.artisans,id)){html=artisan(id);title=D.artisans[id].name+' · Kondapalli';}
+      else{html=notFound();title='Page not found · Kondapalli';section='home';}
+    }catch(e){html=notFound();title='Page not found · Kondapalli';section='home';}
+    root.innerHTML='<section class="view on" id="'+section+'">'+html+'</section>';
+    document.title=title;
     if(r==='craft'){root.firstChild.style.background='var(--sage)';}
-    document.getElementById('n-craft').classList.toggle('on',r==='craft');
-    document.getElementById('n-home').classList.toggle('on',r!=='craft');
-    if(r==='book'&&D.books[id]){
-      var sp=document.getElementById('sp'), lg=document.getElementById('lang');
-      var draw=function(){sp.innerHTML=spreads(id);lg.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.l===lang)})};
-      lg.addEventListener('click',function(e){if(e.target.dataset.l){lang=e.target.dataset.l;draw()}}); draw();
-    }
-    root.querySelectorAll('[data-note]').forEach(function(b){b.addEventListener('click',function(){document.getElementById(b.dataset.note).classList.toggle('on')})});
-    window.scrollTo(0,0);
+    var nc=document.getElementById('n-craft'), nh=document.getElementById('n-home');
+    nc.classList.toggle('on',r==='craft'); nh.classList.toggle('on',r!=='craft');
+    nc.setAttribute('aria-current',r==='craft'?'page':'false'); nh.setAttribute('aria-current',r!=='craft'?'page':'false');
+    var lg=document.getElementById('lang');
+    if(lg){var sp=document.getElementById('sp'), bid=id;
+      var draw=function(){sp.innerHTML=spreads(bid);lg.querySelectorAll('button').forEach(function(b){var on=b.dataset.l===lang;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)})};
+      lg.addEventListener('click',function(e){var l=e.target.dataset&&e.target.dataset.l;if(l){lang=l;try{localStorage.setItem('kp_lang',l)}catch(x){}draw()}}); draw();}
+    root.querySelectorAll('[data-note]').forEach(function(b){b.addEventListener('click',function(){var n=document.getElementById(b.dataset.note),on=n.classList.toggle('on');b.setAttribute('aria-expanded',on)})});
+    root.querySelectorAll('[data-back]').forEach(function(l){l.addEventListener('click',function(e){if(trail.length>1){e.preventDefault();history.back();}})});
+    window.scrollTo(0,goingBack&&scrolls[cur]?scrolls[cur]:0);
+    if(!first){var h1=root.querySelector('h1');if(h1){h1.setAttribute('tabindex','-1');h1.focus({preventScroll:true});}}
+    first=false;
   }
+  if('scrollRestoration' in history)history.scrollRestoration='manual';
   window.addEventListener('hashchange',render); render();
 })();
 </script>
