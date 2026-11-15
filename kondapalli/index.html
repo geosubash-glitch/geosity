@@ -142,6 +142,29 @@ nav a{min-height:44px;display:flex;align-items:center;justify-content:center}
 a.btn{text-decoration:none}
 @media(prefers-reduced-motion:reduce){.view.on{animation:none}.card:active{transform:none}}
 footer{padding-bottom:calc(26px + env(safe-area-inset-bottom))}
+
+/* hierarchy pass */
+h2.sub{font-size:20px;margin-top:42px}
+.figs{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+.fig{display:block;text-decoration:none}
+.fig img{width:100%;aspect-ratio:422/320;object-fit:cover;border-radius:18px;display:block;background:var(--sage)}
+.fig b{font-family:var(--head);font-weight:800;font-size:21px;color:var(--ink);display:block;margin-top:10px;line-height:1.15}
+.fig small{font-size:13.5px;display:block;margin-top:2px;color:var(--muted)}
+.fig:active{opacity:.85}
+.ctile{display:block;text-decoration:none;margin-top:22px}
+.ctile img{width:100%;aspect-ratio:900/651;object-fit:cover;border-radius:20px;display:block}
+.ctile b{font-family:var(--head);font-weight:800;font-size:22px;color:var(--ink);display:block;margin-top:10px;line-height:1.15}
+.ctile small{font-size:13.5px;color:var(--muted)}
+.maker{display:flex;gap:14px;align-items:center;background:var(--sage);border-radius:22px;padding:14px;text-decoration:none;margin-top:16px}
+.maker img{width:84px;height:84px;border-radius:16px;object-fit:cover;flex:none}
+.maker b{font-family:var(--head);font-weight:800;font-size:21px;color:var(--ink);display:block;line-height:1.15}
+.maker small{font-size:13.5px;color:var(--muted);display:block;margin-top:3px}
+.maker .ic{color:var(--green);margin-left:auto;width:22px;height:22px;flex:none}
+.talk p{font-family:var(--head);font-weight:700;font-size:18px;line-height:1.38;color:var(--ink);padding-left:14px;border-left:3px solid var(--green);margin-top:16px}
+.steps{margin-top:4px}
+.mini{display:flex;gap:12px;align-items:center;text-decoration:none;margin-top:14px}
+.mini img{width:64px;height:64px;border-radius:12px;object-fit:cover}
+.mini b{font-family:var(--head);font-weight:800;font-size:17px;color:var(--ink)}
 </style>
 </head>
 <body>
@@ -158,7 +181,7 @@ footer{padding-bottom:calc(26px + env(safe-area-inset-bottom))}
 <main id="root"><noscript><p style="padding:30px 0;font-size:16px;line-height:1.5">This page needs JavaScript to show the makers of your book’s figures. Please turn it on and reload.</p></noscript></main>
 <footer>A student design project at NID Andhra Pradesh. Artisan details are shared with their consent.</footer>
 </div>
-<script src="data.js?v=4"></script>
+<script src="data.js?v=5"></script>
 <script>
 (function(){
   var D=DATA, root=document.getElementById('root'), trail=[], scrolls={}, first=true;
@@ -168,27 +191,31 @@ footer{padding-bottom:calc(26px + env(safe-area-inset-bottom))}
   var LEFT='<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
   var STEPS='<div class="step"><em>01</em><div><b>Carved with care</b><span>Shaped by hand from soft Tella Poniki wood.</span></div></div><div class="step"><em>02</em><div><b>Brought to life in color</b><span>Assembled and painted by skilled artisans.</span></div></div>';
   var FOOT='<p class="foot">A living craft. A story worth sharing.</p>';
+  function figCard(id,sub){var t=D.toys[id];return '<a class="fig" href="#/toy/'+id+'"><img src="'+t.img+'" alt="" width="423" height="321" loading="lazy"><b>'+esc(t.name)+'</b><small>'+esc(sub)+'</small></a>';}
+  function bookTile(id){var b=D.books[id];return '<a class="ctile" href="#/book/'+id+'"><img src="'+b.cover+'" alt="" width="900" height="651"><b>'+esc(b.title)+'</b><small>'+b.toys.length+' figures</small></a>';}
+  function makerCard(id,line){var a=D.artisans[id];return '<a class="maker" href="#/artisan/'+id+'"><img src="'+a.photo+'" alt="" width="84" height="84"><div><b>'+esc(a.name)+'</b><small>'+esc(line)+'</small></div>'+ARROW+'</a>';}
   function toyCard(id,sub){var t=D.toys[id];return '<a class="card" href="#/toy/'+id+'"><img src="'+t.img+'" alt="" width="423" height="321" loading="lazy"><div class="meta"><div><b>'+esc(t.name)+'</b><small>'+esc(sub)+'</small></div>'+ARROW+'</div></a>';}
   function bookCard(id){var b=D.books[id];return '<a class="bookcard" href="#/book/'+id+'"><img src="'+b.cover+'" alt="" width="900" height="651"><div><b>'+esc(b.title)+'</b><small>'+b.toys.length+' figures</small></div></a>';}
   function craft(){return '<section id="craft"><h1>Small toys,<br>a beautiful tradition.</h1><p class="where">Made in Kondapalli, Andhra Pradesh</p><p class="intro">In a village near Vijayawada, artisans turn lightweight wood into colorful characters. These handmade toys carry stories of animals, village life and Indian traditions.</p><div class="panel"><h2>From wood to wonder</h2>'+STEPS+'<div class="step"><em>03</em><div><b>Made for stories</b><span>Each character invites a little imagination.</span></div></div></div><div class="together"><h3>A little together-time</h3><p>Ask your child: “What adventure will your animal go on today?” Explore its story together.</p></div>'+FOOT+'</section>';}
-  function home(){return '<h1 style="font-size:36px;line-height:1.12;margin-top:26px">Which book do you have?</h1><p class="lead" style="font-size:16.5px;line-height:1.5;margin-top:12px">Pick your book to meet the people who made its figures.</p>'+Object.keys(D.books).map(bookCard).join('')+'<p class="more">&nbsp;</p>';}
-  function book(id){var b=D.books[id], others=Object.keys(D.books).filter(function(k){return k!==id});
-    return '<h1 style="font-size:32px;line-height:1.15;margin-top:24px">'+esc(b.title)+'</h1>'
-    +'<div class="bookhead"><img src="'+b.cover+'" alt="Cover of '+esc(b.title)+'" width="900" height="651"><p>The book tells the story. This page is about the people who made its figures.</p></div>'
-    +'<h2 class="sub">The figures in your book</h2><p style="font-size:15px;margin-top:6px">Tap a figure to meet the artisan who made it.</p><div class="grid">'+b.toys.map(function(k){return toyCard(k,'By '+D.artisans[D.toys[k].artisan].name)}).join('')+'</div>'
-    +(b.talk&&b.talk.length?'<div class="together" style="margin-top:30px"><h3>A little together-time</h3>'+b.talk.map(function(t){return '<p>'+esc(t)+'</p>'}).join('')+'</div>':'')
-    +(others.length?'<h2 class="sub">'+(others.length>1?'More books':'Another book')+'</h2>'+others.map(bookCard).join(''):'')+FOOT;}
+  function home(){return '<h1 style="font-size:34px;line-height:1.1;margin-top:26px">Which book do you have?</h1>'+Object.keys(D.books).map(bookTile).join('')+'<p class="more">&nbsp;</p>';}
+  function book(id){var b=D.books[id], others=Object.keys(D.books).filter(function(k){return k!==id}), seen={}, makers=[];
+    b.toys.forEach(function(k){var a=D.toys[k].artisan;if(!seen[a]){seen[a]=1;makers.push(a)}});
+    return '<h1 style="font-size:30px;line-height:1.15;margin-top:24px">'+esc(b.title)+'</h1>'
+    +'<div class="figs">'+b.toys.map(function(k){return figCard(k,'By '+D.artisans[D.toys[k].artisan].name)}).join('')+'</div>'
+    +'<h2 class="sub">Made by</h2>'+makers.map(function(a){return makerCard(a,'Meet the artisan')}).join('')
+    +(b.talk&&b.talk.length?'<h2 class="sub">To talk about together</h2><div class="talk">'+b.talk.map(function(t){return '<p>'+esc(t)+'</p>'}).join('')+'</div>':'')
+    +(others.length?'<h2 class="sub">'+(others.length>1?'More books':'Another book')+'</h2>'+others.map(bookCard).join(''):'');}
   function toy(id){var t=D.toys[id], a=D.artisans[t.artisan], b=D.books[t.book], mates=b?b.toys.filter(function(k){return k!==id}):[];
-    return (b?'<a class="back" href="#/book/'+t.book+'" data-back>'+LEFT+'Back to the book</a>':'<a class="back" href="#/">'+LEFT+'Back</a>')+'<img class="big" src="'+t.img+'" alt="'+esc(t.name)+', a Kondapalli wooden toy" width="423" height="321"><h1 style="font-size:34px;margin-top:16px">'+esc(t.name)+'</h1>'+(b?'<a class="from" href="#/book/'+t.book+'">From '+esc(b.title)+'</a>':'')
-    +(a?'<h2 class="sub">Made by</h2><a class="madeby" href="#/artisan/'+t.artisan+'"><img src="'+a.photo+'" alt="" width="76" height="76"><div><b>'+esc(a.name)+'</b><small>'+esc(a.role)+'</small></div>'+ARROW+'</a>':'')
-    +'<div class="panel" style="margin-top:26px"><h2>From wood to wonder</h2>'+STEPS+'</div>'
-    +(mates.length?'<h2 class="sub">Also in this book</h2><div class="grid">'+mates.map(function(k){return toyCard(k,'See this figure')}).join('')+'</div>':'')+FOOT;}
+    return (b?'<a class="back" href="#/book/'+t.book+'" data-back>'+LEFT+'Back to the book</a>':'<a class="back" href="#/">'+LEFT+'Back</a>')+'<img class="big" src="'+t.img+'" alt="'+esc(t.name)+', a Kondapalli wooden toy" width="423" height="321"><h1 style="font-size:38px;margin-top:16px">'+esc(t.name)+'</h1>'+(b?'<a class="from" href="#/book/'+t.book+'">From '+esc(b.title)+'</a>':'')
+    +(a?'<h2 class="sub" style="margin-top:30px">Made by</h2>'+makerCard(t.artisan,'Meet the artisan'):'')
+    +'<h2 class="sub">How it is made</h2><div class="steps">'+STEPS+'</div>'
+    +(mates.length?'<h2 class="sub">Also in this book</h2><div class="figs">'+mates.map(function(k){return figCard(k,'By '+D.artisans[D.toys[k].artisan].name)}).join('')+'</div>':'');}
   function artisan(id){var a=D.artisans[id], first=esc(a.name.split(' ')[0]), made=Object.keys(D.toys).filter(function(k){return D.toys[k].artisan===id});
     var contact=a.phone?'<a class="btn line" href="tel:'+esc(a.phone)+'">Call '+first+'</a>':'<button class="btn line" data-note="n2" aria-expanded="false" aria-controls="n2">View contact number</button><div class="note" id="n2" role="status">Contact number to be added with the artisan’s consent.</div>';
     var commission=a.whatsapp?'<a class="btn fill" href="https://wa.me/'+esc(a.whatsapp)+'">Request a commission</a>':'<button class="btn fill" data-note="n1" aria-expanded="false" aria-controls="n1">Request a commission</button><div class="note" id="n1" role="status">Commission requests open once the artisan has given consent.</div>';
-    return '<a class="back" href="#/" data-back>'+LEFT+'Back</a><img class="portrait" src="'+a.photo+'" alt="Portrait of '+esc(a.name)+'" width="968" height="692"><h1 style="margin-top:18px">'+esc(a.name)+'</h1><div class="role">'+esc(a.role)+'</div><h2>A little about '+first+'</h2><p class="bio">'+esc(a.bio)+'</p>'
-    +(made.length?'<h2 class="sub">Figures made by '+first+'</h2><div class="grid">'+made.map(function(k){var bk=D.books[D.toys[k].book];return toyCard(k,bk?bk.short:'')}).join('')+'</div>':'')
-    +commission+contact+FOOT;}
+    return '<a class="back" href="#/" data-back>'+LEFT+'Back</a><img class="portrait" src="'+a.photo+'" alt="Portrait of '+esc(a.name)+'" width="968" height="692"><h1 style="margin-top:18px">'+esc(a.name)+'</h1><div class="role">'+esc(a.role)+'</div><h2 style="font-size:20px;margin-top:30px">About '+first+'</h2><p class="bio">'+esc(a.bio)+'</p>'
+    +(made.length?'<h2 class="sub">Figures made by '+first+'</h2><div class="figs">'+made.map(function(k){var bk=D.books[D.toys[k].book];return figCard(k,bk?bk.short:'')}).join('')+'</div>':'')
+    +commission+contact;}
   function notFound(){return '<div class="notfound"><h1>We could not find that page</h1><p>The link may be old or mistyped. The makers of your book’s figures are one tap away.</p><a class="btn fill" href="#/">See the books</a></div>';}
   function parse(){var h=location.hash.replace(/^#\/?/,''),q=h.indexOf('?');if(q>-1)h=h.slice(0,q);
     var p=h.split('/').filter(Boolean).map(function(x){try{return decodeURIComponent(x).toLowerCase()}catch(e){return x.toLowerCase()}});return {r:p[0]||'',id:p[1]||''};}
