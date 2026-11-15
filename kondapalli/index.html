@@ -2,19 +2,173 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kondapalli Bommalu</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kondapalli · Little toys. Big stories.</title>
+<meta name="description" content="Meet the maker behind your Kondapalli toy.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Nunito:wght@700;800&family=Noto+Sans+Telugu:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  body{margin:0;background:#fcefd9;color:#3f1a0d;font-family:system-ui,sans-serif;line-height:1.6}
-  main{max-width:32rem;margin:0 auto;padding:3rem 1.25rem}
-  h1{font-size:2rem;margin:0 0 .5rem}
-  p{font-size:1.125rem;margin:0 0 1rem}
+:root{
+  --green:#275c47; --ink:#293f38; --muted:#596b62;
+  --cream:#fffaec; --sage:#eef3ea; --line:#e7e9df; --chip:#eef0e6;
+  --yellow:#f7e5a8; --white:#fff;
+  --head:'Nunito','Avenir Next','Segoe UI',system-ui,sans-serif;
+  --body:'Inter','Noto Sans Telugu',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--body);color:var(--muted);background:#f3f2ea;min-height:100vh;display:flex;justify-content:center}
+.app{width:100%;max-width:480px;min-height:100vh;background:var(--cream);position:relative;display:flex;flex-direction:column}
+@media(min-width:520px){body{padding:28px 0}.app{min-height:0;border-radius:28px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 12px 40px rgba(41,63,56,.10);overflow:hidden}}
+header{padding:28px 22px 0}
+.brand{font-family:var(--head);font-weight:800;font-size:30px;color:var(--green);line-height:1.1}
+.tag{font-size:14px;font-weight:500;margin-top:4px}
+nav{display:flex;background:var(--chip);border-radius:16px;padding:5px;margin:20px 0 4px}
+nav a{flex:1;text-align:center;text-decoration:none;font-weight:500;font-size:16px;color:var(--ink);padding:12px 0;border-radius:12px}
+nav a.on{background:var(--green);color:#fff;font-weight:600}
+main{flex:1;padding:0 22px 8px}
+.view{display:none}
+.view.on{display:block;animation:in .25s ease}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+h1,h2,h3{font-family:var(--head);font-weight:800;color:var(--ink)}
+.kick{font-size:12px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--green)}
+/* landing */
+#home .kick{margin-top:26px}
+#home h1{font-size:38px;line-height:1.1;margin-top:10px}
+#home p.lead{font-size:17px;line-height:1.5;margin-top:14px;max-width:310px}
+.row{display:flex;justify-content:space-between;align-items:baseline;margin-top:34px}
+.row h2{font-size:25px}
+.row span{font-size:14px;font-weight:500}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+.card{display:block;text-decoration:none;background:#fff;border:1px solid var(--line);border-radius:20px;padding:9px 9px 14px}
+.card img{width:100%;display:block;aspect-ratio:422/320;object-fit:cover;border-radius:14px}
+.card .meta{display:flex;justify-content:space-between;align-items:center;padding:12px 6px 0}
+.card b{font-family:var(--head);font-weight:700;font-size:19px;color:var(--ink);display:block}
+.card small,.bookcard small{font-size:13px;color:var(--muted)}
+.card i{font-style:normal;font-size:22px;color:var(--green)}
+.card:active{transform:scale(.98)}
+.more{text-align:center;font-size:13px;font-weight:500;margin:24px 0 8px}
+/* craft */
+#craft{margin:0 -22px;padding:24px 22px 8px;background:var(--sage)}
+#root .view{padding-bottom:6px}
+#craft .chip{display:inline-block;background:var(--chip);border-radius:99px;padding:9px 16px;font-size:12px;font-weight:600;letter-spacing:.09em;color:var(--green)}
+#craft h1{font-size:36px;line-height:1.14;margin-top:20px}
+#craft .where{font-size:15px;font-weight:600;color:var(--green);margin-top:16px}
+#craft .intro{font-size:16.5px;line-height:1.6;margin-top:14px}
+.panel{background:#fff;border-radius:22px;padding:22px 20px 14px;margin-top:28px}
+.panel h2{font-size:24px}
+.step{display:flex;gap:14px;margin-top:20px;align-items:flex-start}
+.step em{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-style:normal;font-weight:600;font-size:14px;color:var(--green)}
+.step:nth-of-type(1) em{background:#e4efe6}.step:nth-of-type(2) em{background:#fbe3d6}.step:nth-of-type(3) em{background:#e4efe6}
+.step b{display:block;font-weight:600;font-size:16px;color:var(--ink)}
+.step span{font-size:14.5px;line-height:1.45;display:block;margin-top:2px}
+.panel .step:last-child{margin-bottom:10px}
+.together{background:var(--yellow);border-radius:22px;padding:20px;margin-top:18px}
+.together h3{font-size:21px}
+.together p{font-size:14.5px;line-height:1.5;color:var(--ink);margin-top:8px}
+.foot{text-align:center;font-size:13px;font-weight:500;color:var(--green);padding:26px 0 18px}
+/* artisan */
+.back{display:inline-block;margin-top:18px;color:var(--green);font-weight:500;font-size:15px;text-decoration:none}
+#artisan .kick{margin-top:22px}
+.portrait{width:100%;display:block;aspect-ratio:967/691;object-fit:cover;border-radius:20px;margin-top:14px}
+#artisan h1{font-size:34px;margin-top:18px}
+.role{font-size:14.5px;margin-top:4px}
+#artisan h2{font-size:23px;margin-top:30px}
+#artisan p.bio{font-size:15.5px;line-height:1.6;margin-top:10px}
+.btn{display:block;width:100%;font:600 16px var(--body);border-radius:14px;padding:17px;margin-top:14px;cursor:pointer;text-align:center}
+.btn.fill{background:var(--green);color:#fff;border:1.5px solid var(--green);margin-top:26px}
+.btn.line{background:transparent;color:var(--green);border:1.5px solid var(--green)}
+.note{font-size:13.5px;line-height:1.45;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;display:none}
+.note.on{display:block}
+footer{text-align:center;font-size:12.5px;padding:10px 22px 26px}
+footer a{color:var(--green)}
+.tabbar{display:none}
+
+.bookcard{display:flex;gap:14px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:10px;text-decoration:none;margin-top:14px;align-items:center}
+.bookcard img{width:44%;aspect-ratio:213/154;object-fit:cover;border-radius:12px}
+.bookcard b{font-family:var(--head);font-weight:800;font-size:19px;color:var(--ink);display:block;line-height:1.2}
+.bookcard small{font-size:13px;display:block;margin-top:6px}
+.cover{width:100%;display:block;border-radius:20px;margin-top:16px}
+.lesson{background:var(--yellow);border-radius:20px;padding:18px 20px;margin-top:22px}
+.lesson b{font-family:var(--head);font-weight:800;font-size:18px;color:var(--ink);display:block}
+.lesson p{font-size:15px;line-height:1.5;color:var(--ink);margin-top:6px}
+.lang{display:flex;background:var(--chip);border-radius:12px;padding:4px;margin-top:16px}
+.lang button{flex:1;border:0;background:none;font:500 14px var(--body);color:var(--ink);padding:9px 0;border-radius:9px;cursor:pointer}
+.lang button.on{background:var(--green);color:#fff}
+.sp{display:flex;gap:12px;margin-top:18px}
+.sp em{flex:none;width:30px;height:30px;border-radius:9px;background:var(--chip);display:grid;place-items:center;font-style:normal;font-size:13px;font-weight:600;color:var(--green)}
+.sp p{font-size:15.5px;line-height:1.55;color:var(--ink)}
+.sp p.te{margin-top:6px;color:var(--muted);line-height:1.7}
+.madeby{display:flex;gap:14px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:20px;padding:12px;text-decoration:none;margin-top:14px}
+.madeby img{width:76px;height:76px;border-radius:14px;object-fit:cover}
+.madeby b{font-family:var(--head);font-weight:800;font-size:19px;color:var(--ink);display:block}
+.madeby small{font-size:13.5px}
+.madeby i{margin-left:auto;font-style:normal;font-size:22px;color:var(--green)}
+.big{width:100%;display:block;aspect-ratio:422/320;object-fit:cover;border-radius:20px;margin-top:14px}
+.from{display:block;margin-top:8px;font-size:15px;color:var(--green);font-weight:500;text-decoration:none}
+.sub{font-size:23px;margin-top:32px}
+.grid.three{grid-template-columns:1fr 1fr}
 </style>
 </head>
 <body>
-<main>
-  <h1>Kondapalli Bommalu</h1>
-  <p>The story, the craft and the artisan behind this toy are coming soon.</p>
-</main>
+<div class="app">
+<header>
+  <div class="brand">Kondapalli</div>
+  <div class="tag">Little toys. Big stories.</div>
+  <nav aria-label="Pages">
+    <a href="#/" id="n-home" class="on">Books</a>
+    <a href="#/craft" id="n-craft">About Us</a>
+  </nav>
+</header>
+<main id="root"></main>
+<footer>Sample page for the Kondapalli storybook. Details are filled in with each artisan’s consent.</footer>
+</div>
+<script src="data.js"></script>
+<script>
+(function(){
+  var D=DATA, root=document.getElementById('root'), lang='both';
+  var $=function(h){return h};
+  function toyCard(id){var t=D.toys[id];return '<a class="card" href="#/toy/'+id+'"><img src="'+t.img+'" alt="'+t.name+', a Kondapalli toy"><div class="meta"><div><b>'+t.name+'</b><small>Meet its maker</small></div><i>↗</i></div></a>';}
+  function bookCard(id){var b=D.books[id];return '<a class="bookcard" href="#/book/'+id+'"><img src="'+b.cover+'" alt="Cover of '+b.title+'"><div><b>'+b.title+'</b><small>'+b.toys.length+' figures · 8 spreads</small></div></a>';}
+  function craft(){return '<section id="craft"><span class="chip">OUR ROOTS</span><h1>Small toys,<br>a beautiful tradition.</h1><p class="where">Made in Kondapalli, Andhra Pradesh</p><p class="intro">In a village near Vijayawada, artisans turn lightweight wood into colorful characters. These handmade toys carry stories of animals, village life and Indian traditions.</p><div class="panel"><h2>From wood to wonder</h2><div class="step"><em>01</em><div><b>Carved with care</b><span>Shaped by hand from soft Tella Poniki wood.</span></div></div><div class="step"><em>02</em><div><b>Brought to life in color</b><span>Assembled and painted by skilled artisans.</span></div></div><div class="step"><em>03</em><div><b>Made for stories</b><span>Each character invites a little imagination.</span></div></div></div><div class="together"><h3>A little together-time</h3><p>Ask your child: “What adventure will your animal go on today?” Explore its story together.</p></div><p class="foot">A living craft. A story worth sharing.</p></section>';}
+  function home(){return '<div class="kick" style="margin-top:26px">Little toys. Big stories.</div><h1 style="font-size:36px;line-height:1.12;margin-top:10px">Stories with a figure to hold</h1><p class="lead" style="font-size:16.5px;line-height:1.5;margin-top:12px">Each book comes with its characters carved by hand in Kondapalli. Pick a book to read its story and meet the maker.</p>'+Object.keys(D.books).map(bookCard).join('')+'<p class="more" style="margin-top:28px"> </p>';}
+  function book(id){var b=D.books[id]; if(!b) return home();
+    var others=Object.keys(D.books).filter(function(k){return k!==id});
+    return '<h1 style="font-size:32px;line-height:1.15;margin-top:24px">'+b.title+'</h1><img class="cover" src="'+b.cover+'" alt="Cover of '+b.title+'">'
+    +(b.line?'<div class="lesson"><b>The lesson</b><p>'+b.line+'</p></div>':'')
+    +'<h2 class="sub">Meet the figures</h2><p style="font-size:15px;margin-top:6px">The characters that come with this book. Tap one to see who made it.</p><div class="grid">'+b.toys.map(toyCard).join('')+'</div>'
+    +'<h2 class="sub">Read the story</h2><div class="lang" id="lang"><button data-l="both">Both</button><button data-l="en">English</button><button data-l="te">తెలుగు</button></div><div id="sp"></div>'
+    +'<h2 class="sub">Also in this set</h2>'+others.map(bookCard).join('')+'<p class="foot">A living craft. A story worth sharing.</p>';}
+  function spreads(id){var b=D.books[id];return b.spreads.map(function(s,i){return '<div class="sp"><em>'+(i+1)+'</em><div>'+(lang!=='te'?'<p>'+s[0]+'</p>':'')+(lang!=='en'?'<p class="'+(lang==='both'?'te':'')+'">'+s[1]+'</p>':'')+'</div></div>';}).join('');}
+  function toy(id){var t=D.toys[id]; if(!t) return home(); var a=D.artisans[t.artisan], b=D.books[t.book];
+    var mates=b.toys.filter(function(k){return k!==id});
+    return '<a class="back" href="#/book/'+t.book+'">← Back to the book</a><img class="big" src="'+t.img+'" alt="'+t.name+', a Kondapalli toy"><h1 style="font-size:34px;margin-top:16px">'+t.name+'</h1><a class="from" href="#/book/'+t.book+'">From '+b.title+'</a>'
+    +'<h2 class="sub">Made by</h2><a class="madeby" href="#/artisan/'+t.artisan+'"><img src="'+a.photo+'" alt="'+a.name+'"><div><b>'+a.name+'</b><small>'+a.role+'</small></div><i>→</i></a>'
+    +'<div class="panel" style="margin-top:26px"><h2>From wood to wonder</h2><div class="step"><em>01</em><div><b>Carved with care</b><span>Shaped by hand from soft Tella Poniki wood.</span></div></div><div class="step"><em>02</em><div><b>Brought to life in color</b><span>Assembled and painted by skilled artisans.</span></div></div></div>'
+    +'<h2 class="sub">Also in this book</h2><div class="grid">'+mates.map(toyCard).join('')+'</div><p class="foot">A living craft. A story worth sharing.</p>';}
+  function artisan(id){var a=D.artisans[id]; if(!a) return home();
+    var made=Object.keys(D.toys).filter(function(k){return D.toys[k].artisan===id});
+    return '<a class="back" href="javascript:history.back()">← Back</a><img class="portrait" src="'+a.photo+'" alt="'+a.name+', artisan, in his shop"><h1 style="margin-top:18px">'+a.name+'</h1><div class="role">'+a.role+'</div><h2>A little about '+a.name.split(' ')[0]+'</h2><p class="bio">'+a.bio+'</p>'
+    +'<h2 class="sub">Figures made by '+a.name.split(' ')[0]+'</h2><div class="grid">'+made.map(toyCard).join('')+'</div>'
+    +'<button class="btn fill" data-note="n1">Request a commission</button><div class="note" id="n1">Commission requests open once the artisan has given his consent.</div><button class="btn line" data-note="n2">View contact number</button><div class="note" id="n2">Contact number to be added with the artisan’s consent.</div><p class="foot">A living craft. A story worth sharing.</p>';}
+  function render(){
+    var p=(location.hash||'#/').slice(2).split('/'), r=p[0]||'', id=p[1], html;
+    if(r==='craft')html=craft(); else if(r==='book')html=book(id); else if(r==='toy')html=toy(id); else if(r==='artisan')html=artisan(id); else html=home();
+    root.innerHTML='<section class="view on" id="'+(r||'home')+'">'+html+'</section>';
+    if(r==='craft'){root.firstChild.style.background='var(--sage)';}
+    document.getElementById('n-craft').classList.toggle('on',r==='craft');
+    document.getElementById('n-home').classList.toggle('on',r!=='craft');
+    if(r==='book'&&D.books[id]){
+      var sp=document.getElementById('sp'), lg=document.getElementById('lang');
+      var draw=function(){sp.innerHTML=spreads(id);lg.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.l===lang)})};
+      lg.addEventListener('click',function(e){if(e.target.dataset.l){lang=e.target.dataset.l;draw()}}); draw();
+    }
+    root.querySelectorAll('[data-note]').forEach(function(b){b.addEventListener('click',function(){document.getElementById(b.dataset.note).classList.toggle('on')})});
+    window.scrollTo(0,0);
+  }
+  window.addEventListener('hashchange',render); render();
+})();
+</script>
 </body>
 </html>
